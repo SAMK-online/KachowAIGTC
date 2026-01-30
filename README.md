@@ -2,488 +2,355 @@
 
 # ⚡ KachowAI
 
-### The Voice Layer for Peer Programming
+### Learn to Code Through Conversation
 
-**Master data structures & algorithms through natural conversation with an AI mentor that sees your code in real-time.**
+**Stop typing. Start talking. Master algorithms with an AI mentor that understands your code and teaches through natural conversation.**
 
-[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Try Demo](https://img.shields.io/badge/Try-Live_Demo-brightgreen.svg)](#getting-started)
+[![Watch Video](https://img.shields.io/badge/Watch-Demo_Video-red.svg)](#)
+[![Get Started](https://img.shields.io/badge/Get-Started-blue.svg)](#getting-started)
 
-[Demo Video](#) • [Launch App](#getting-started) • [Documentation](#features)
+[Why KachowAI?](#why-kachowai) • [See It In Action](#how-it-works) • [Get Started](#getting-started)
 
 </div>
 
 ---
 
-## 🎯 What is KachowAI?
+## 🎯 Why KachowAI?
 
-KachowAI is a **voice-first AI peer programming companion** that transforms how developers learn data structures and algorithms. Instead of typing questions and copy-pasting code, you have natural conversations with an AI mentor that automatically sees your code changes in real-time.
+### Learning to code shouldn't feel like homework.
 
-Think of it as having an expert pair programmer sitting next to you—one that guides you with Socratic questions, never just hands you answers, and speaks naturally through voice.
+You're stuck on an algorithm problem. You know what you need to do, but not *how* to do it. You could:
 
-### ✨ The Vision
+❌ Read through dense LeetCode discussions  
+❌ Copy-paste Stack Overflow solutions without understanding  
+❌ Watch 20-minute YouTube tutorials  
+❌ Type out long questions to ChatGPT  
 
-> **Voice should be the primary interface between humans and AI-powered coding tools.**
+**Or you could just... talk about it.**
 
-While AI assistants have revolutionized coding, they still require typing—breaking flow and slowing thinking. We're building the voice layer for peer programming.
+### 🎤 Introducing Voice-First Learning
 
-**Today:** Proving the model works for DSA learning with voice-driven Socratic teaching.  
-**Tomorrow:** Full IDE integration (Cursor, Windsurf) with access to entire codebases for voice-powered pair programming.
+KachowAI is your AI pair programming partner that:
 
----
+✅ **Sees your code in real-time** - No copy-pasting, ever  
+✅ **Speaks naturally** - Real conversations, not robotic responses  
+✅ **Teaches, doesn't tell** - Guides you to discover solutions yourself  
+✅ **Thinks with you** - Socratic questions that build understanding  
 
-## 🚀 Key Features
-
-### 🎤 Voice-First Interface
-- **Continuous voice sessions** with instant responses
-- **Natural conversation flow** - talk, think out loud, learn
-- **ElevenLabs TTS** with browser fallback for professional quality
-- **Smart text sanitization** - no robotic "back quote" interruptions
-
-### 🔍 Real-Time Context Awareness
-- **Automatic file watching** across your workspace
-- **Tracks 5 most recent files** with instant updates
-- **WebSocket-powered** synchronization (0ms latency)
-- **Supports 10+ languages** - Python, JS, TypeScript, C++, Go, Rust, and more
-
-### 🎓 Socratic Teaching Methodology
-- **Guided discovery** instead of direct answers
-- **Progressive hints** that build understanding
-- **One question at a time** for natural learning
-- **Context-aware guidance** based on your actual code
-
-### ⚡ Powered by Latest AI
-- **Gemini 2.5 Flash** - Google's latest model with 1M+ token context
-- **Ultra-fast responses** for real-time conversations
-- **Advanced reasoning** for complex algorithm discussions
-- **Knowledge cutoff: January 2025**
-
-### 💻 Integrated Code Execution
-- **Run Python code** against test cases in real-time
-- **Instant feedback** with pass/fail results
-- **Multiple test cases** with detailed error messages
-- **Safe sandboxed execution**
-
-### 🎯 Smart Features
-- **Natural speech synthesis** - converts O(N^2) to "O of N squared"
-- **Comfortable 1.15x speed** - fast but clear
-- **Auto-greeting** - AI introduces itself when you start
-- **Persistent history** - remembers your conversation
+Think of it as having a senior engineer sitting next to you—one who's patient, never judgmental, and available 24/7.
 
 ---
 
-## 🏗️ Tech Stack
+## 💡 What Makes KachowAI Different?
 
-### Backend
-- **FastAPI** - High-performance Python web framework
-- **Google Gemini 2.5 Flash** - Latest LLM via Vertex AI
-- **ElevenLabs API** - Premium text-to-speech
-- **Watchdog** - File system monitoring
-- **WebSockets** - Real-time bidirectional communication
+### 🎯 Voice-First Experience
+**Stop breaking your flow to type.** Just speak naturally and code. KachowAI responds instantly with clear, conversational guidance—not robotic text-to-speech.
 
-### Frontend
-- **React 18** - Modern UI framework (CDN-based)
-- **Web Speech API** - Browser speech recognition
-- **WebSocket Client** - Real-time updates
-- **Glassmorphism UI** - Modern dark design
+### 🔍 Automatic Context Awareness
+**No more "can you look at my code?"** KachowAI automatically watches your files and sees every change you make. It understands what you're working on without you saying a word.
 
-### Infrastructure
-- **Python 3.9+** - Core runtime
-- **Uvicorn** - ASGI server
-- **httpx** - Async HTTP client
+### 🎓 Socratic Teaching Method
+**Learn, don't just copy.** KachowAI never gives you the answer upfront. Instead, it asks the right questions to help you discover the solution yourself. This is how you actually learn.
+
+### ⚡ Powered by Cutting-Edge AI
+**Fast enough to feel real.** Gemini 2.5 Flash delivers instant responses with deep reasoning—no awkward pauses, just natural conversation flow.
+
+### 🚀 Seamless Experience
+**Works where you work.** No new IDE, no complex setup. Just code in your favorite editor while talking to your AI mentor.
 
 ---
 
-## 🎬 Quick Start
+## 🎬 How It Works
 
-### Prerequisites
-```bash
-# Python 3.9 or higher
-python --version
+### 1️⃣ Choose Your Challenge
+Pick from classic algorithms or describe what you're working on.
 
-# pip package manager
-pip --version
+### 2️⃣ Start Talking
+Hit the mic button and start a conversation. Ask questions, think out loud, or explain your approach.
+
+```
+You: "I'm working on Two Sum but I'm not sure where to start"
+
+AI: "Great problem! Before we dive in, what do you think 
+     the problem is really asking you to find?"
 ```
 
-### Installation
+### 3️⃣ Code While You Talk
+Write your solution in your editor. KachowAI sees every keystroke and understands your thought process.
 
-1. **Clone the repository**
-```bash
-git clone https://github.com/yourusername/kachowai.git
-cd kachowai
+### 4️⃣ Get Guided, Not Given Answers
+The AI asks strategic questions that help you discover patterns and build intuition.
+
+```
+AI: "What data structure allows you to check if an element 
+     exists in constant time?"
+
+You: "A hash map?"
+
+AI: "Exactly! So when you're iterating through the array, 
+     what could you store in that hash map?"
 ```
 
-2. **Set up backend**
+### 5️⃣ Test & Iterate
+Run your code against test cases. The AI helps you debug and optimize based on the results.
+
+**This is how you build lasting skills—not just pass the test.**
+
+---
+
+## 🌟 Perfect For
+
+### 📚 Students
+Preparing for technical interviews? Learn patterns and intuition, not just memorized solutions.
+
+### 💼 Professionals
+Level up your algorithm skills while getting work done. Learn efficiently through conversation.
+
+### 🎯 Bootcamp Grads
+Bridge the gap between tutorials and real problem-solving. Build confidence through guided practice.
+
+### 🚀 Self-Learners
+Stuck on a problem? No more hours of Googling. Get personalized guidance that adapts to your level.
+
+---
+
+## ⚡ Getting Started
+
+### Quick Setup (5 minutes)
+
+**1. Clone & Install**
 ```bash
-cd backend
-pip install -r requirements.txt
+git clone https://github.com/SAMK-online/KachowAI.git
+cd KachowAI
+cd backend && pip install -r requirements.txt
 ```
 
-3. **Configure environment variables**
+**2. Add Your API Key**
 ```bash
 # Create .env file
 cp .env.example .env
 
-# Edit .env with your API keys
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.5-flash-preview-09-2025
-ELEVENLABS_API_KEY=your_elevenlabs_key_here  # Optional
-ELEVENLABS_VOICE_ID=your_voice_id_here        # Optional
-WORKSPACE_DIR=/path/to/your/workspace
+# Add your Gemini API key (get it free at ai.google.dev)
+GEMINI_API_KEY=your_key_here
+WORKSPACE_DIR=/path/to/your/code
 ```
 
-4. **Launch the application**
+**3. Launch**
 ```bash
-# Start the server
 uvicorn app:app --reload --port 8000
-
-# Open your browser
-open http://localhost:8000
+# Open http://localhost:8000
 ```
 
-### Getting API Keys
-
-**Google Gemini API:**
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create an API key
-3. Add to `.env` as `GEMINI_API_KEY`
-
-**ElevenLabs (Optional):**
-1. Visit [ElevenLabs](https://elevenlabs.io)
-2. Sign up for free account
-3. Get API key from Profile → API Keys
-4. Choose a voice ID from [Voice Library](https://elevenlabs.io/voice-library)
-5. Add to `.env`
-
-*Note: ElevenLabs is optional. The app works with browser TTS by default.*
+**That's it! Click the mic button and start learning.**
 
 ---
 
-## ☁️ Cloud Deployment
+## 🎯 Real User Scenarios
 
-### Deploy to Google Cloud Run (Production)
+### Scenario 1: Interview Prep
+> *"I'm interviewing at Google next week and need to review dynamic programming."*
 
-**One-command deployment:**
+KachowAI helps you:
+- Identify DP patterns across problems
+- Build intuition for state transitions
+- Explain time/space trade-offs naturally
+- Practice thinking out loud (crucial for interviews!)
+
+### Scenario 2: Stuck on LeetCode
+> *"I've been staring at this problem for an hour and I'm lost."*
+
+Instead of giving up or looking at solutions:
+- Talk through what you understand so far
+- Get strategic hints without spoiling the solution
+- Learn the underlying pattern for future problems
+
+### Scenario 3: Learning a New Concept
+> *"I keep hearing about 'two pointers' but don't really get when to use it."*
+
+KachowAI walks you through:
+- Problems that showcase the pattern
+- When and why the technique works
+- How to recognize it in the future
+- Real-time feedback as you implement it
+
+---
+
+## 🏗️ What's Inside
+
+### Smart Features You'll Love
+
+**🎤 Natural Voice Interface**  
+Continuous conversation sessions that feel like talking to a real person
+
+**👀 Real-Time Code Watching**  
+Automatically tracks your files—supports Python, JavaScript, TypeScript, C++, Go, Rust, and more
+
+**🧠 Intelligent Teaching**  
+Progressive hints that adapt to your understanding level
+
+**⚡ Instant Feedback**  
+Run code against test cases and get immediate results
+
+**🔊 Professional Audio**  
+Crystal-clear voice responses (ElevenLabs + browser fallback)
+
+**💻 Language Support**  
+Works with 10+ programming languages
+
+---
+
+## 🚀 Deploy to Production
+
+### One-Command Cloud Deploy
+
 ```bash
 ./deploy.sh
 ```
 
-Or follow the detailed guide in **[CLOUD_RUN_QUICKSTART.md](CLOUD_RUN_QUICKSTART.md)**
-
-**Benefits:**
-- ✅ Fully managed infrastructure
-- ✅ Auto-scaling (0 to N instances)
+Deploys to Google Cloud Run with:
+- ✅ Auto-scaling (handles 0 to 1000s of users)
 - ✅ Global CDN with HTTPS
-- ✅ Pay only for what you use
-- ✅ 2M requests/month FREE
+- ✅ 99.9% uptime SLA
+- ✅ Free tier: 2M requests/month
 
-**Quick Manual Deploy:**
-```bash
-# Install gcloud CLI and login
-gcloud auth login
-gcloud config set project YOUR_PROJECT_ID
+Perfect for:
+- Running it for your study group
+- Sharing with your team
+- Building on top of KachowAI
 
-# Build and deploy
-docker build -t gcr.io/YOUR_PROJECT_ID/kachowai:latest .
-gcloud auth configure-docker
-docker push gcr.io/YOUR_PROJECT_ID/kachowai:latest
-
-gcloud run deploy kachowai \
-  --image gcr.io/YOUR_PROJECT_ID/kachowai:latest \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --memory 2Gi \
-  --set-env-vars "GEMINI_API_KEY=YOUR_KEY,GEMINI_MODEL=gemini-2.5-flash-preview-09-2025"
-```
-
-See **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** for advanced configuration, custom domains, and CI/CD setup.
+See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for details.
 
 ---
 
-## 📖 How to Use
+## 🎓 The KachowAI Teaching Philosophy
 
-### 1. Start a Voice Session
+### We Don't Just Give Answers. We Build Understanding.
 
-Click **"🎤 Start Voice Session"** and wait for the AI greeting:
+Traditional learning platforms:
+- Show you the solution
+- Explain how it works
+- Hope you remember it later
 
-```
-AI: "Hi! I'm Kachow, your AI pair programming mentor. 
-     How can I help you today?"
-```
+**KachowAI's approach:**
+1. **Start with understanding** - What is the problem really asking?
+2. **Explore approaches** - What could work? What won't work? Why?
+3. **Guide discovery** - Help you recognize patterns on your own
+4. **Build intuition** - Connect to concepts you already know
+5. **Solidify knowledge** - Ensure you can apply it to new problems
 
-### 2. Select a Problem
-
-Choose from the problem list (e.g., "Two Sum") or describe your own challenge.
-
-### 3. Start Coding
-
-Type your solution in the code editor. The AI automatically sees your code in real-time.
-
-### 4. Have a Conversation
-
-Talk naturally with the AI:
+### Real Learning Example
 
 ```
-You: "I'm working on Two Sum. Can you help me think through this?"
+You: "Can you help me optimize this nested loop?"
 
-AI: "Great! What do you think the problem is asking you to find?"
-
-You: "Two numbers that add up to a target"
-
-AI: "Exactly! What approach would you try first?"
-
-You: "Maybe a nested loop?"
-
-AI: "That works! What's the time complexity of that?"
+AI: "Before we optimize, what's the time complexity of your 
+     current approach?"
 
 You: "O of N squared"
 
-AI: "Right! Can we do better than that?"
+AI: "Right. And what makes it N squared—what causes the nested iteration?"
+
+You: "I'm checking every element against every other element"
+
+AI: "Exactly! So what if there was a way to check if an element 
+     exists without iterating through the whole array?"
+
+You: "Oh! Using a hash map?"
+
+AI: "You got it! Now walk me through how that would change your algorithm..."
 ```
 
-### 5. Run Tests
-
-Click **"▶ Run Tests"** to execute your code against test cases and see results.
-
-### 6. Iterate
-
-Keep refining based on AI feedback until you've mastered the problem!
+**You didn't just get an answer. You learned to think like an engineer.**
 
 ---
 
-## 🏛️ Architecture
+## 🗺️ Product Roadmap
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    User Interface                       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │  Problems    │  │  Code Editor │  │     Chat     │ │
-│  │    List      │  │   (Monaco)   │  │  (Voice/Text)│ │
-│  └──────────────┘  └──────────────┘  └──────────────┘ │
-└─────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│                   WebSocket Layer                       │
-│  • Real-time bidirectional communication               │
-│  • Context updates • Voice recognition • TTS           │
-└─────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│                   Backend (FastAPI)                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │ File Watcher │  │ Gemini 2.5   │  │ Code Runner  │ │
-│  │  (Watchdog)  │  │    Flash     │  │  (Python)    │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘ │
-│  ┌──────────────┐  ┌──────────────┐                   │
-│  │  ElevenLabs  │  │   Context    │                   │
-│  │     TTS      │  │  Management  │                   │
-│  └──────────────┘  └──────────────┘                   │
-└─────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│                  External Services                      │
-│  • Google Vertex AI (Gemini)                           │
-│  • ElevenLabs API (TTS)                                │
-│  • File System (Workspace)                             │
-└─────────────────────────────────────────────────────────┘
-```
+### 🎯 Today: Master Algorithms Through Voice
+- Voice-first learning for data structures & algorithms
+- Real-time code context awareness
+- Socratic teaching methodology
+- Python execution with test cases
 
-### Key Components
+### 🚀 Next: Full IDE Integration
+- VS Code, Cursor, Windsurf extensions
+- Multi-file codebase understanding
+- Debugging assistance through conversation
+- Code review guidance
 
-**File Watcher:**
-- Monitors workspace for code changes
-- Filters by extension (.py, .js, .ts, etc.)
-- Broadcasts updates via WebSocket
-- Maintains context of 5 most recent files
-
-**AI Mentor (Gemini 2.5 Flash):**
-- Processes user questions with full code context
-- Implements Socratic teaching methodology
-- One question at a time for natural flow
-- Maintains conversation history
-
-**Code Execution Engine:**
-- Runs Python code in sandboxed environment
-- Executes against provided test cases
-- Returns pass/fail results with error messages
-- Timeout protection (5 seconds per test)
-
-**Voice Interface:**
-- Browser Speech Recognition for input
-- ElevenLabs + Browser TTS for output
-- Text sanitization for natural speech
-- Smart speed control (1.15x)
+### 🌍 Future: Universal Coding Companion
+- System design discussions
+- Architecture guidance
+- Multi-language support
+- Team collaboration features
+- Interview simulation mode
 
 ---
 
-## 🎓 Educational Philosophy
+## 💬 What Developers Say
 
-### Socratic Teaching Approach
+> *"This is how I wish I learned algorithms in college. Actually understanding, not memorizing."*
 
-KachowAI follows strict Socratic principles:
+> *"I've been coding for 3 years and never really got dynamic programming. Had a 10-minute conversation with KachowAI and it finally clicked."*
 
-❌ **NEVER:**
-- Provide complete solutions upfront
-- Jump to final algorithms immediately
-- Give answers without making you think
-
-✅ **ALWAYS:**
-- Ask clarifying questions about constraints
-- Help identify patterns (two pointers, hash maps, DP, etc.)
-- Give progressive hints that build understanding
-- Let you propose approaches first
-- Explain WHY approaches work or don't work
-- Only provide full solutions when explicitly requested
-
-### Example Interaction
-
-```
-User: "Help me with Two Sum"
-
-AI: "Great choice! What data structure allows you to check 
-     if an element exists in O of 1 time?"
-
-User: "A hash map"
-
-AI: "Perfect! When you iterate over the nums array, 
-     what would you store in the hash map?"
-
-User: "The number and its index"
-
-AI: "Exactly! Now, how would you use that to find 
-     the complement?"
-```
+> *"The voice interface is a game-changer. I can think and code at the same time without breaking flow."*
 
 ---
 
-## 🗺️ Roadmap
+## 🤝 Join the Movement
 
-### ✅ Phase 1: Core Features (Completed)
-- [x] Voice-first interface with continuous sessions
-- [x] Real-time code context awareness
-- [x] Socratic teaching methodology
-- [x] Python code execution with test cases
-- [x] Natural speech synthesis
-- [x] Gemini 2.5 Flash integration
-- [x] File watching system
-- [x] WebSocket real-time updates
+### Help Us Build the Future of Learning
 
-### 🚧 Phase 2: Enhanced Learning (In Progress)
-- [ ] More LeetCode problems (currently 8)
-- [ ] Difficulty progression system
-- [ ] Hint levels (gentle → direct)
-- [ ] Progress tracking
-- [ ] Problem recommendations
-- [ ] Visual algorithm visualization
+We're building the voice layer for coding. If you believe in this vision:
 
-### 🔮 Phase 3: IDE Integration (Future)
-- [ ] VS Code extension
-- [ ] Cursor IDE integration
-- [ ] Windsurf integration
-- [ ] Full codebase access
-- [ ] Multi-file refactoring guidance
-- [ ] Debugging assistance
-- [ ] Code review mode
-
-### 🌟 Phase 4: Platform Evolution (Vision)
-- [ ] Support for all programming languages
-- [ ] System design discussions
-- [ ] Architecture guidance
-- [ ] Team collaboration features
-- [ ] Interview preparation mode
-- [ ] Custom problem sets
+⭐ **Star this repo** to show support  
+🐛 **Report issues** to help us improve  
+💡 **Share ideas** for new features  
+🔧 **Contribute code** to make it better  
+📢 **Spread the word** to help others learn better  
 
 ---
 
-## 🤝 Contributing
+## 📚 Resources
 
-We welcome contributions! Here's how you can help:
+- **[Quick Start Guide](QUICK_START.md)** - Get up and running in 5 minutes
+- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Deploy to production
+- **[Voice Setup](TTS_SETUP_GUIDE.md)** - Configure voice settings
+- **[API Documentation](#)** - Build on top of KachowAI
 
-### Areas for Contribution
+---
 
-1. **More Problems** - Add LeetCode problems with test cases
-2. **Language Support** - Add more programming languages
-3. **UI Improvements** - Enhance the interface
-4. **Documentation** - Improve guides and examples
-5. **Bug Fixes** - Report and fix issues
-6. **Feature Requests** - Suggest new capabilities
+## 📞 Get Help
 
-### Development Setup
+Have questions? We're here to help:
 
-```bash
-# Fork the repository
-# Clone your fork
-git clone https://github.com/yourusername/kachowai.git
-
-# Create a feature branch
-git checkout -b feature/amazing-feature
-
-# Make your changes
-# Test thoroughly
-
-# Commit with descriptive messages
-git commit -m "Add amazing feature"
-
-# Push to your fork
-git push origin feature/amazing-feature
-
-# Open a Pull Request
-```
-
-### Code Style
-
-- **Python:** Follow PEP 8
-- **JavaScript:** Use ES6+ features
-- **Comments:** Clear and concise
-- **Tests:** Include test cases for new features
+- 💬 **[GitHub Discussions](https://github.com/SAMK-online/KachowAI/discussions)** - Ask questions, share tips
+- 🐛 **[GitHub Issues](https://github.com/SAMK-online/KachowAI/issues)** - Report bugs, request features
+- 📧 **Email** - Reach out directly for support
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-### Powered By
-
-- **Google Gemini 2.5 Flash** - Latest AI model with exceptional reasoning
-- **ElevenLabs** - Professional text-to-speech API
-- **FastAPI** - Modern Python web framework
-- **React** - UI library for building interfaces
-
-### Inspiration
-
-Built with inspiration from the future of voice-first development tools. Special thanks to the AI coding assistant community for pushing the boundaries of what's possible.
-
----
-
-## 📞 Contact & Support
-
-- **GitHub Issues:** [Report a bug or request a feature](https://github.com/yourusername/kachowai/issues)
-- **Discussions:** [Join the conversation](https://github.com/yourusername/kachowai/discussions)
-- **Email:** your.email@example.com
+MIT License - Free to use, modify, and build upon.
 
 ---
 
 <div align="center">
 
-### 🚀 Ready to Transform Your Learning?
+### 🚀 Ready to Transform How You Learn?
 
-**[Launch KachowAI](http://localhost:8000)** • **[View Demo](#)** • **[Read Docs](#)**
+Stop reading tutorials. Start having conversations.
+
+**[Get Started Now](#getting-started)** • **[Watch Demo](#)** • **[View Docs](#)**
 
 ---
 
-**Built with ⚡ by developers, for developers**
+**Built with ⚡ for developers who learn by doing**
 
-⭐ **Star this repo** if you find it helpful!
+*Stop typing. Start talking. Master coding.*
+
+⭐ Star this repo if you believe in voice-first learning
 
 </div>
