@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KachowAI - Voice Peer Programming</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #000000;
+      --bg-elevated: #0a0a0a;
+      --panel: rgba(23, 23, 23, 0.6);
+      --panel-hover: rgba(30, 30, 30, 0.7);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.6);
+      --accent: #22d3ee;
+      --accent-hover: #06b6d4;
+      --success: #34d399;
+      --error: #ef4444;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Top Navigation */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: rgba(23, 23, 23, 0.4);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--accent), #0ea5e9);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .breadcrumb-sep {
+      color: var(--border);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary.listening {
+      background: var(--error);
+      color: white;
+      animation: pulse-glow 1.5s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-dot.disconnected {
+      background: var(--error);
+    }
+
+    /* Main Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr 420px;
+      height: calc(100vh - 57px);
+      overflow: hidden;
+    }
+
+    /* Left Sidebar - Problem Selector */
+    .left-sidebar {
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .problem-card {
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .problem-card:hover {
+      background: var(--panel-hover);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .problem-card.active {
+      border-color: var(--accent);
+      background: rgba(34, 211, 238, 0.05);
+    }
+
+    .problem-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .problem-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .difficulty-badge {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .difficulty-easy {
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .difficulty-medium {
+      background: rgba(251, 191, 36, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .difficulty-hard {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Center - Code Editor */
+    .center-panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    .editor-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .problem-info {
+      flex: 1;
+    }
+
+    .problem-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .problem-description {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .editor-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .editor-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+    }
+
+    .editor-empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .editor-empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .editor-empty-subtitle {
+      font-size: 14px;
+      text-align: center;
+      max-width: 400px;
+    }
+
+    #code-editor {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: none;
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+    }
+
+    .editor-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-elevated);
+    }
+
+    .test-results {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Right Sidebar - Chat */
+    .right-sidebar {
+      background: var(--bg-elevated);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chat-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 40px;
+    }
+
+    .chat-empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .chat-empty-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .chat-empty-subtitle {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .message-role {
+      color: var(--text-muted);
+    }
+
+    .message-role.user {
+      color: var(--accent);
+    }
+
+    .message-role.assistant {
+      color: var(--success);
+    }
+
+    .message-content {
+      background: var(--panel);
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .message.user .message-content {
+      background: rgba(34, 211, 238, 0.08);
+      border-color: rgba(34, 211, 238, 0.2);
+    }
+
+    .message.system .message-content {
+      background: rgba(52, 211, 153, 0.08);
+      border-color: rgba(52, 211, 153, 0.2);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .chat-input-container {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .chat-input-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chat-input-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    #chat-input {
+      flex: 1;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      resize: none;
+      outline: none;
+      min-height: 44px;
+      max-height: 120px;
+    }
+
+    #chat-input:focus {
+      border-color: var(--accent);
+    }
+
+    .voice-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .voice-btn.listening {
+      background: var(--error);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Problem Details Panel */
+    .problem-details {
+      padding: 20px;
+      max-height: 40vh;
+      overflow-y: auto;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+
+    .problem-section {
+      margin-bottom: 24px;
+    }
+
+    .problem-section h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+
+    .problem-section p, .problem-section div {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+    }
+
+    .problem-section ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .problem-section li {
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 6px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .problem-section li:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    .example-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    .example-box strong {
+      color: var(--text);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .example-box .input-line {
+      color: var(--text-muted);
+    }
+
+    .example-box .output-line {
+      color: var(--success);
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 35px rgba(239, 68, 68, 0.9), 0 0 50px rgba(239, 68, 68, 0.4);
+        transform: scale(1.03);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .main-layout {
+        grid-template-columns: 280px 1fr 360px;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr 360px;
+      }
+      .left-sidebar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+      .right-sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <div class="nav-left">
+      <a href="/" class="logo">
+        <div class="logo-icon">⚡</div>
+        <span>KachowAI</span>
+      </a>
+      <div class="breadcrumb">
+        <span>🏠 Home</span>
+        <span class="breadcrumb-sep">|</span>
+        <span>Learn to Code By Talking</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <select id="language-select">
+        <option value="python">Python</option>
+        <option value="javascript">JavaScript</option>
+        <option value="typescript">TypeScript</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+      </select>
+      <button class="btn btn-secondary" id="reset-btn">🔄 Reset</button>
+      <button class="btn btn-primary" id="voice-btn">
+        🎤 Start Voice Session
+      </button>
+      <div class="status-indicator">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Connected</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+    <!-- Left Sidebar: Problem Selector -->
+    <div class="left-sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">Select a Problem</h2>
+        <p class="sidebar-subtitle">
+          Choose a data structures & algorithms problem to practice with voice-guided mentoring
+        </p>
+      </div>
+      <div class="sidebar-content" id="problems-list">
+        <div class="problem-card active" data-problem="two-sum">
+          <div class="problem-title">1. Two Sum</div>
+          <div class="problem-meta">
+            <span class="difficulty-badge difficulty-easy">Easy</span>
+            <span style="color: var(--text-muted)">Array, Hash Map</span>
+          </div>
+        </div>
+        <div class="problem-card" data-problem="valid-parentheses">
+          <div class="problem-title">20. Valid Parentheses</div>
+          <div class="problem-meta">
+            <span class="difficulty-badge difficulty-easy">Easy</span>
+            <span style="color: var(--text-muted)">Stack, String</span>
+          </div>
+        </div>
+        <div class="problem-card" data-problem="reverse-linked-list">
+          <div class="problem-title">206. Reverse Linked List</div>
+          <div class="problem-meta">
+            <span class="difficulty-badge difficulty-easy">Easy</span>
+            <span style="color: var(--text-muted)">Linked List</span>
+          </div>
+        </div>
+        <div class="problem-card" data-problem="best-time-stock">
+          <div class="problem-title">121. Best Time to Buy and Sell Stock</div>
+          <div class="problem-meta">
+            <span class="difficulty-badge difficulty-easy">Easy</span>
+            <span style="color: var(--text-muted)">Array, DP</span>
+          </div>
+        </div>
+        <div class="problem-card" data-problem="valid-anagram">
+          <div class="problem-title">242. Valid Anagram</div>
+          <div class="problem-meta">
+            <span class="difficulty-badge difficulty-easy">Easy</span>
+            <span style="color: var(--text-muted)">Hash Map, String</span>
+          </div>
+        </div>
+        <div class="problem-card" data-problem="binary-search">
+          <div class="problem-title">704. Binary Search</div>
+          <div class="problem-meta">
+            <span class="difficulty-badge difficulty-easy">Easy</span>
+            <span style="color: var(--text-muted)">Binary Search, Array</span>
+          </div>
+        </div>
+        <div class="problem-card" data-problem="merge-intervals">
+          <div class="problem-title">56. Merge Intervals</div>
+          <div class="problem-meta">
+            <span class="difficulty-badge difficulty-medium">Medium</span>
+            <span style="color: var(--text-muted)">Array, Sorting</span>
+          </div>
+        </div>
+        <div class="problem-card" data-problem="longest-substring">
+          <div class="problem-title">3. Longest Substring Without Repeating</div>
+          <div class="problem-meta">
+            <span class="difficulty-badge difficulty-medium">Medium</span>
+            <span style="color: var(--text-muted)">Sliding Window</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Code Editor -->
+    <div class="center-panel">
+      <div class="editor-header" id="editor-header">
+        <div class="problem-info">
+          <div class="problem-name" id="current-problem-name">Two Sum</div>
+          <div class="problem-description" id="current-problem-desc">
+            Given an array of integers nums and an integer target, return indices of the two numbers that add up to target.
+          </div>
+        </div>
+      </div>
+      
+      <!-- Problem Details Panel -->
+      <div class="problem-details" id="problem-details">
+        <div class="problem-section">
+          <h3>Description</h3>
+          <div id="problem-description"></div>
+        </div>
+        
+        <div class="problem-section">
+          <h3>Constraints</h3>
+          <ul id="problem-constraints"></ul>
+        </div>
+        
+        <div class="problem-section">
+          <h3>Examples</h3>
+          <div id="problem-examples"></div>
+        </div>
+      </div>
+      
+      <div class="editor-container">
+        <textarea id="code-editor" placeholder="# Start coding here...
+# The AI will automatically track your changes
+
+def two_sum(nums, target):
+    # Your code here
+    pass"></textarea>
+      </div>
+      <div class="editor-footer">
+        <div class="test-results">
+          <span>⚙️ Test Results</span>
+          <span id="test-status">Click "Run Tests" to validate your solution</span>
+        </div>
+        <button class="btn btn-primary" id="run-tests-btn">
+          ▶️ Run Tests
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Conversation -->
+    <div class="right-sidebar">
+      <div class="chat-header">
+        <h3 class="chat-title">Conversation</h3>
+        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" id="hide-chat-btn">
+          ⬅️ Hide
+        </button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-empty">
+          <div class="chat-empty-icon">💬</div>
+          <div class="chat-empty-title">Start a voice session or type a message to begin</div>
+          <div class="chat-empty-subtitle">
+            Your mentor has full context of your code and problem. Ask anything!
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-container">
+        <div class="chat-input-hint">
+          💡 The AI can see your current code, problem, and hint level
+        </div>
+        <div class="chat-input-wrapper">
+          <textarea 
+            id="chat-input" 
+            placeholder="Type a message... (AI can see your code)"
+            rows="1"
+          ></textarea>
+          <button class="btn btn-primary voice-btn" id="voice-toggle-btn" title="Hold to talk">
+            🎤
+          </button>
+          <button class="btn btn-primary" id="send-btn" style="padding: 0 20px;">
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Problem Database
+    const PROBLEMS = {
+      'two-sum': {
+        title: '1. Two Sum',
+        description: `Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+
+You may assume that each input would have exactly one solution, and you may not use the same element twice.
+
+You can return the answer in any order.`,
+        constraints: [
+          '2 <= nums.length <= 10⁴',
+          '-10⁹ <= nums[i] <= 10⁹',
+          '-10⁹ <= target <= 10⁹',
+          'Only one valid answer exists.'
+        ],
+        examples: [
+          {
+            input: 'nums = [2,7,11,15], target = 9',
+            output: '[0,1]',
+            explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].'
+          },
+          {
+            input: 'nums = [3,2,4], target = 6',
+            output: '[1,2]',
+            explanation: 'Because nums[1] + nums[2] == 6, we return [1, 2].'
+          },
+          {
+            input: 'nums = [3,3], target = 6',
+            output: '[0,1]',
+            explanation: ''
+          }
+        ],
+        starterCode: `def two_sum(nums, target):
+    # Your code here
+    pass
+
+# Test
+print(two_sum([2,7,11,15], 9))  # Expected: [0,1]`,
+        testCases: [
+          { input: '', expected: '[0, 1]' }
+        ]
+      },
+      'valid-parentheses': {
+        title: '20. Valid Parentheses',
+        description: `Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
+
+An input string is valid if:
+- Open brackets must be closed by the same type of brackets.
+- Open brackets must be closed in the correct order.
+- Every close bracket has a corresponding open bracket of the same type.`,
+        constraints: [
+          '1 <= s.length <= 10⁴',
+          's consists of parentheses only \'()[]{}\'.'
+        ],
+        examples: [
+          {
+            input: 's = "()"',
+            output: 'true',
+            explanation: ''
+          },
+          {
+            input: 's = "()[]{}"',
+            output: 'true',
+            explanation: ''
+          },
+          {
+            input: 's = "(]"',
+            output: 'false',
+            explanation: ''
+          }
+        ],
+        starterCode: `def is_valid(s):
+    # Your code here
+    pass
+
+# Test
+print(is_valid("()"))  # Expected: True`,
+        testCases: []
+      },
+      'best-time-stock': {
+        title: '121. Best Time to Buy and Sell Stock',
+        description: `You are given an array prices where prices[i] is the price of a given stock on the ith day.
+
+You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.
+
+Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.`,
+        constraints: [
+          '1 <= prices.length <= 10⁵',
+          '0 <= prices[i] <= 10⁴'
+        ],
+        examples: [
+          {
+            input: 'prices = [7,1,5,3,6,4]',
+            output: '5',
+            explanation: 'Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6-1 = 5.'
+          },
+          {
+            input: 'prices = [7,6,4,3,1]',
+            output: '0',
+            explanation: 'In this case, no transactions are done and the max profit = 0.'
+          }
+        ],
+        starterCode: `def max_profit(prices):
+    # Your code here
+    pass
+
+# Test
+print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
+        testCases: []
+      }
+    };
+
+    // Load problem details function
+    function loadProblem(problemKey) {
+      const problem = PROBLEMS[problemKey];
+      if (!problem) return;
+      
+      // Update header
+      document.getElementById('current-problem-name').textContent = problem.title;
+      document.getElementById('current-problem-desc').textContent = 
+        problem.description.split('\n')[0];
+      
+      // Load full description
+      document.getElementById('problem-description').textContent = problem.description;
+      
+      // Load constraints
+      const constraintsList = document.getElementById('problem-constraints');
+      constraintsList.innerHTML = problem.constraints
+        .map(c => `<li>${c}</li>`)
+        .join('');
+      
+      // Load examples
+      const examplesDiv = document.getElementById('problem-examples');
+      examplesDiv.innerHTML = problem.examples
+        .map((ex, i) => `
+          <div class="example-box">
+            <strong>Example ${i + 1}:</strong>
+            <div class="input-line">Input: ${ex.input}</div>
+            <div class="output-line">Output: ${ex.output}</div>
+            ${ex.explanation ? `<div style="margin-top: 6px; font-size: 12px;">${ex.explanation}</div>` : ''}
+          </div>
+        `)
+        .join('');
+      
+      // Load starter code
+      document.getElementById('code-editor').value = problem.starterCode;
+      
+      // Store current problem for testing
+      window.currentProblem = problem;
+    }
+
+    // WebSocket connection
+    const wsUrl = (() => {
+      const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      return `${proto}://${window.location.host}/ws`;
+    })();
+
+    let socket = null;
+    let isConnected = false;
+
+    function connectWebSocket() {
+      socket = new WebSocket(wsUrl);
+      
+      socket.addEventListener('open', () => {
+        isConnected = true;
+        updateStatus('connected', 'Connected');
+      });
+
+      socket.addEventListener('close', () => {
+        isConnected = false;
+        updateStatus('disconnected', 'Disconnected');
+        // Reconnect after 3 seconds
+        setTimeout(connectWebSocket, 3000);
+      });
+
+      socket.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        handleWebSocketMessage(data);
+      });
+    }
+
+    function updateStatus(status, text) {
+      const dot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+      dot.className = 'status-dot' + (status === 'disconnected' ? ' disconnected' : '');
+      statusText.textContent = text;
+    }
+
+    // Auto-play TTS when in voice session
+    // Use browser TTS for speed during voice sessions
+    async function playTTS(text, preferSpeed = true) {
+      try {
+        console.log('🔊 Playing TTS...');
+        
+        // During voice sessions, prioritize SPEED (browser TTS)
+        // For typed messages, prioritize QUALITY (ElevenLabs)
+        if (preferSpeed) {
+          console.log('🔊 Using fast browser TTS for voice session');
+          useBrowserTTS(text);
+          return;
+        }
+        
+        // Try ElevenLabs API for better quality (typed messages)
+        const response = await fetch('/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text, voice_id: null })
+        });
+        
+        if (response.ok) {
+          // ElevenLabs succeeded
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          
+          audio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            console.log('🔊 TTS finished (ElevenLabs)');
+          };
+          
+          await audio.play();
+        } else {
+          // Fallback to browser TTS
+          console.log('🔊 Falling back to browser TTS');
+          useBrowserTTS(text);
+        }
+      } catch (err) {
+        console.error('TTS error, using browser fallback:', err);
+        useBrowserTTS(text);
+      }
+    }
+
+    // Clean text for natural speech (remove code quotes, backticks, etc.)
+    function sanitizeTextForSpeech(text) {
+      return text
+        // Remove backticks (code formatting)
+        .replace(/`/g, '')
+        // Remove emphasis quotes around single words/variables
+        .replace(/'(\w+)'/g, '$1')
+        .replace(/"(\w+)"/g, '$1')
+        // Replace mathematical notations for natural speech
+        .replace(/O\(N\^2\)/g, 'O of N squared')
+        .replace(/O\(N\)/g, 'O of N')
+        .replace(/O\(1\)/g, 'O of 1')
+        .replace(/O\(log N\)/gi, 'O of log N')
+        // Remove extra spaces
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // Browser TTS fallback (Web Speech API)
+    function useBrowserTTS(text) {
+      if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        // Clean text for natural speech
+        const cleanText = sanitizeTextForSpeech(text);
+        
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.rate = 1.15;  // 🎯 Slightly faster (1.0 = normal, 1.15 = 15% faster)
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        utterance.lang = 'en-US';
+        
+        // Try to find a good voice
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => 
+          v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural'))
+        ) || voices.find(v => v.lang.startsWith('en'));
+        
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+        
+        utterance.onend = () => {
+          console.log('🔊 TTS finished (Browser)');
+        };
+        
+        utterance.onerror = (err) => {
+          console.error('Browser TTS error:', err);
+        };
+        
+        window.speechSynthesis.speak(utterance);
+      } else {
+        console.error('No TTS available');
+        addMessage('system', '❌ Text-to-speech not available');
+      }
+    }
+
+    function handleWebSocketMessage(data) {
+      const messagesContainer = document.getElementById('chat-messages');
+      const empty = messagesContainer.querySelector('.chat-empty');
+      if (empty) empty.remove();
+
+      if (data.type === 'llm_message') {
+        addMessage('assistant', data.text);
+        
+        // Auto-play TTS if in voice session
+        if (isListening) {
+          playTTS(data.text);
+        }
+      } else if (data.type === 'context_update') {
+        addMessage('system', `📝 Updated: ${data.filename}`);
+      } else if (data.type === 'error') {
+        addMessage('system', `❌ Error: ${data.message}`);
+      }
+    }
+
+    function addMessage(role, content) {
+      const messagesContainer = document.getElementById('chat-messages');
+      const messageEl = document.createElement('div');
+      messageEl.className = `message ${role}`;
+      
+      if (role !== 'system') {
+        messageEl.innerHTML = `
+          <div class="message-header">
+            <span class="message-role ${role}">${role === 'user' ? 'You' : 'AI Mentor'}</span>
+          </div>
+          <div class="message-content">${content}</div>
+        `;
+      } else {
+        messageEl.innerHTML = `<div class="message-content">${content}</div>`;
+      }
+      
+      messagesContainer.appendChild(messageEl);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function sendMessage(text) {
+      if (!text.trim() || !isConnected) return;
+      
+      const codeEditor = document.getElementById('code-editor');
+      const code = codeEditor.value;
+      
+      addMessage('user', text);
+      
+      socket.send(JSON.stringify({
+        type: 'user_message',
+        text: text,
+        code_context: code || null
+      }));
+    }
+
+    // Event Listeners
+    document.getElementById('send-btn').addEventListener('click', () => {
+      const input = document.getElementById('chat-input');
+      sendMessage(input.value);
+      input.value = '';
+    });
+
+    document.getElementById('chat-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const input = e.target;
+        sendMessage(input.value);
+        input.value = '';
+      }
+    });
+
+    // Problem selection
+    document.querySelectorAll('.problem-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const problemKey = card.dataset.problem;
+        document.querySelectorAll('.problem-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        loadProblem(problemKey);
+        addMessage('system', `📚 Loaded problem: ${PROBLEMS[problemKey]?.title}`);
+      });
+    });
+
+    // Voice button - Continuous conversational mode
+    let recognition = null;
+    let isListening = false;
+    let shouldRestart = false; // For continuous mode
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;  // ← Keep listening continuously
+      recognition.interimResults = true; // ← Show what you're saying in real-time
+      recognition.lang = 'en-US';
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        isListening = true;
+        shouldRestart = true;
+        console.log('🎤 Listening... speak naturally!');
+        addMessage('system', '🎤 Listening... speak naturally!');
+        
+        // Update button text
+        const btn = document.getElementById('voice-btn');
+        if (btn) {
+          btn.innerHTML = '🔴 Stop Listening';
+        }
+      };
+
+      recognition.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        // Show interim results in real-time (optional visual feedback)
+        if (interimTranscript) {
+          console.log('🎤 Hearing:', interimTranscript);
+        }
+
+        // Send final transcript as message
+        if (finalTranscript.trim()) {
+          console.log('🎤 Final:', finalTranscript.trim());
+          sendMessage(finalTranscript.trim());
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error('🎤 Speech recognition error:', event.error);
+        
+        // Only stop on critical errors
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          isListening = false;
+          shouldRestart = false;
+          document.querySelectorAll('.listening').forEach(btn => {
+            btn.classList.remove('listening');
+          });
+          addMessage('system', `❌ Microphone access denied. Please allow microphone permissions.`);
+        } else if (event.error === 'network') {
+          isListening = false;
+          shouldRestart = false;
+          document.querySelectorAll('.listening').forEach(btn => {
+            btn.classList.remove('listening');
+          });
+          addMessage('system', `❌ Network error. Check your connection.`);
+        }
+        // Ignore 'no-speech' and 'aborted' - these are normal in continuous mode
+      };
+
+      recognition.onend = () => {
+        console.log('🎤 Recognition ended, shouldRestart:', shouldRestart);
+        
+        // Auto-restart if we're in continuous mode and haven't manually stopped
+        if (shouldRestart && isListening) {
+          console.log('🎤 Auto-restarting...');
+          try {
+            recognition.start();
+          } catch (err) {
+            console.error('Failed to restart recognition:', err);
+            isListening = false;
+            shouldRestart = false;
+            document.querySelectorAll('.listening').forEach(btn => {
+              btn.classList.remove('listening');
+            });
+          }
+        } else {
+          isListening = false;
+          document.querySelectorAll('.listening').forEach(btn => {
+            btn.classList.remove('listening');
+          });
+          
+          // Reset button text
+          const btn = document.getElementById('voice-btn');
+          if (btn) {
+            btn.innerHTML = '🎤 Start Voice Session';
+          }
+          
+          if (!shouldRestart) {
+            addMessage('system', '🎤 Stopped listening');
+          }
+        }
+      };
+    }
+
+    const voiceBtn = document.getElementById('voice-btn');
+    const voiceToggleBtn = document.getElementById('voice-toggle-btn');
+
+    // Toggle voice session on/off with a single click
+    function toggleVoiceSession() {
+      if (!recognition) {
+        addMessage('system', '❌ Speech recognition not supported in this browser');
+        return;
+      }
+
+      if (isListening) {
+        // Stop listening
+        console.log('🎤 User stopped voice session');
+        shouldRestart = false;
+        isListening = false;
+        try {
+          recognition.stop();
+          document.querySelectorAll('.listening').forEach(btn => {
+            btn.classList.remove('listening');
+          });
+        } catch (err) {
+          console.error('Failed to stop recognition:', err);
+        }
+      } else {
+        // Start listening
+        console.log('🎤 User started voice session');
+        try {
+          shouldRestart = true;
+          document.querySelectorAll('#voice-btn, #voice-toggle-btn').forEach(btn => {
+            btn.classList.add('listening');
+          });
+          recognition.start();
+          
+          // AI greets user first!
+          setTimeout(() => {
+            const greeting = "Hi! I'm Kachow, your AI pair programming mentor. How can I help you today?";
+            addMessage('assistant', greeting);
+            playTTS(greeting);
+          }, 1000); // Wait 1 second for mic to be ready
+          
+        } catch (err) {
+          console.error('Failed to start recognition:', err);
+          document.querySelectorAll('.listening').forEach(btn => {
+            btn.classList.remove('listening');
+          });
+          addMessage('system', '❌ Failed to start voice session');
+        }
+      }
+    }
+
+    // Single click to toggle
+    [voiceBtn, voiceToggleBtn].forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleVoiceSession();
+      });
+    });
+
+    // Reset button
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      if (confirm('Reset conversation and code?')) {
+        document.getElementById('chat-messages').innerHTML = `
+          <div class="chat-empty">
+            <div class="chat-empty-icon">💬</div>
+            <div class="chat-empty-title">Start a voice session or type a message to begin</div>
+            <div class="chat-empty-subtitle">
+              Your mentor has full context of your code and problem. Ask anything!
+            </div>
+          </div>
+        `;
+        document.getElementById('code-editor').value = '';
+      }
+    });
+
+    // Run tests button with real Python execution
+    document.getElementById('run-tests-btn').addEventListener('click', async () => {
+      const code = document.getElementById('code-editor').value;
+      const testStatus = document.getElementById('test-status');
+      
+      if (!window.currentProblem) {
+        testStatus.textContent = '❌ No problem selected';
+        return;
+      }
+      
+      testStatus.textContent = '⏳ Running Python code...';
+      testStatus.style.color = 'var(--text-muted)';
+      
+      try {
+        const response = await fetch('/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: code,
+            language: 'python',
+            test_cases: window.currentProblem.testCases || []
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Execution failed');
+        }
+        
+        const result = await response.json();
+        
+        if (result.all_passed) {
+          testStatus.textContent = `✅ ${result.passed_tests}/${result.total_tests} tests passed!`;
+          testStatus.style.color = 'var(--success)';
+          addMessage('system', '🎉 All tests passed! Your solution is correct.');
+        } else {
+          testStatus.textContent = `❌ ${result.passed_tests}/${result.total_tests} tests passed`;
+          testStatus.style.color = 'var(--error)';
+          
+          // Show failed test details
+          const failedTests = result.results.filter(r => !r.passed);
+          if (failedTests.length > 0) {
+            failedTests.forEach(test => {
+              const errorMsg = test.error ? `\nError: ${test.error}` : '';
+              addMessage('system', `❌ Test ${test.test_num} failed:\nExpected: ${test.expected}\nGot: ${test.output}${errorMsg}`);
+            });
+          }
+        }
+      } catch (error) {
+        testStatus.textContent = '❌ Execution error';
+        testStatus.style.color = 'var(--error)';
+        addMessage('system', `❌ Error: ${error.message}`);
+      }
+    });
+
+    // Auto-resize textarea
+    const chatInput = document.getElementById('chat-input');
+    chatInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Initialize
+    connectWebSocket();
+    
+    // Load initial problem
+    setTimeout(() => {
+      loadProblem('two-sum');
+    }, 100);
+  </script>
+</body>
+</html>
