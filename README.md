@@ -13,16 +13,16 @@
 **Open-source AI pair programming mentor powered by NVIDIA NIM and Riva**
 
 [![NVIDIA NIM](https://img.shields.io/badge/Powered_by-NVIDIA_NIM-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://build.nvidia.com/)
-[![NVIDIA Riva](https://img.shields.io/badge/Voice-NVIDIA_Riva-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://www.nvidia.com/en-us/ai-data-science/products/riva/)
 [![GTC 2026](https://img.shields.io/badge/GTC_2026-Contest_Entry-76B900?style=for-the-badge)](https://developer.nvidia.com/gtc-golden-ticket-contest)
+[![Open Source](https://img.shields.io/badge/Open-Source-76B900?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SAMK-online/KachowAIGTC)
 
 **Built for**: [NVIDIA GTC Golden Ticket Developer Contest](https://developer.nvidia.com/gtc-golden-ticket-contest?ncid=so-twit-669129&linkId=100000404698236#section-how-to-enter)  
-**Challenge**: Open-source project built with NVIDIA technology (NIM API + Riva TTS)  
+**Challenge**: Open-source project built with NVIDIA NIM technology  
 **Submission Period**: January 27 – February 15, 2026
 
-### 🚀 NVIDIA Technology Stack
+### 🚀 Technology Stack
 - **🧠 LLM**: NVIDIA NIM - Llama 3.1 70B Instruct (128K context, sub-second response)
-- **🎤 Voice**: NVIDIA Riva TTS (enterprise-grade voice synthesis)
+- **🎤 Voice**: ElevenLabs TTS + Browser Speech API (NVIDIA Riva integration ready)
 - **☁️ Infrastructure**: Deployed on Google Cloud Run with auto-scaling
 
 ---
@@ -98,10 +98,11 @@ KachowAI leverages **NVIDIA NIM (NVIDIA Inference Microservices)** to deliver pr
 - **24/7 availability**: Production-grade reliability
 - **Cost-effective**: Efficient resource utilization
 
-**🎤 NVIDIA Riva Integration**
-- **Natural voice synthesis**: Enterprise-grade text-to-speech
-- **Low latency**: Smooth conversational experience
-- **High quality**: Professional-sounding AI mentor
+**🎤 Voice Integration**
+- **ElevenLabs TTS**: High-quality voice synthesis for AI responses
+- **Browser Speech API**: Native speech recognition for voice input
+- **Intelligent echo cancellation**: Prevents feedback during conversations
+- **NVIDIA Riva ready**: Architecture supports easy Riva integration
 
 ### Technical Architecture
 
@@ -128,10 +129,12 @@ KachowAI leverages **NVIDIA NIM (NVIDIA Inference Microservices)** to deliver pr
 └─────────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────┐
-│  NVIDIA Riva TTS (Optional)                     │
-│  └─ Enterprise voice synthesis                  │
+│  Voice Synthesis Layer                          │
+│  ├─ ElevenLabs API (High-quality TTS)           │
+│  └─ Browser Speech API (Fallback)               │
 │     • Natural speech output                     │
-│     • Low latency streaming                     │
+│     • Echo cancellation                         │
+│     • Riva-ready architecture                   │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -229,11 +232,12 @@ NVIDIA_API_KEY=your_key_here
 NVIDIA_MODEL=meta/llama-3.1-70b-instruct
 WORKSPACE_DIR=/path/to/your/code
 
-# Optional: Add NVIDIA Riva for enterprise TTS
-# RIVA_FUNCTION_ID=your_riva_function_id
+# Optional: Add ElevenLabs for high-quality voice
+ELEVENLABS_API_KEY=your_key_here
+ELEVENLABS_VOICE_ID=your_voice_id
 
-# Optional: Add ElevenLabs for voice (fallback)
-# ELEVENLABS_API_KEY=your_key_here
+# Optional: Add NVIDIA Riva for enterprise TTS (future)
+# RIVA_FUNCTION_ID=your_riva_function_id
 ```
 
 **3. Launch**
@@ -416,7 +420,7 @@ We're building the voice layer for coding. If you believe in this vision:
 
 ### NVIDIA Resources
 - **[NVIDIA NIM Documentation](https://build.nvidia.com/)** - Get your free API key
-- **[NVIDIA Riva](https://www.nvidia.com/en-us/ai-data-science/products/riva/)** - Learn about enterprise voice AI
+- **[NVIDIA AI Catalog](https://build.nvidia.com/explore/discover)** - Explore AI models
 - **[GTC Contest Info](https://developer.nvidia.com/gtc-golden-ticket-contest)** - Contest details and rules
 
 ### Project Resources
@@ -445,8 +449,9 @@ Have questions? We're here to help:
 
 ### NVIDIA Technologies Used
 - ✅ **NVIDIA NIM** - Llama 3.1 70B Instruct for intelligent mentoring
-- ✅ **NVIDIA Riva** - Enterprise-grade voice synthesis (optional)
 - ✅ **build.nvidia.com** - NVIDIA's AI inference platform
+- ✅ **128K context window** - Full codebase understanding
+- ✅ **Sub-second inference** - Real-time conversational experience
 
 ### Why This Project Matters
 KachowAI democratizes access to AI-powered coding education through:
@@ -474,7 +479,7 @@ Stop reading tutorials. Start having conversations.
 
 ---
 
-**Built with 💚 NVIDIA NIM • Powered by Llama 3.1 70B • Voice by Riva**
+**Built with 💚 NVIDIA NIM • Powered by Llama 3.1 70B • Open Source**
 
 *Stop typing. Start talking. Master coding.*
 
