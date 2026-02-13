@@ -27,13 +27,25 @@
 
 ---
 
-[![Try Demo](https://img.shields.io/badge/Try-Live_Demo-brightgreen.svg)](#getting-started)
+[![Try Demo](https://img.shields.io/badge/Try-Live_Demo-brightgreen.svg)](https://kachowai-5e4eyxuy5q-uc.a.run.app)
 [![Watch Video](https://img.shields.io/badge/Watch-Demo_Video-red.svg)](#)
 [![Get Started](https://img.shields.io/badge/Get-Started-blue.svg)](#getting-started)
+
+🚀 **[Try KachowAI Live](https://kachowai-5e4eyxuy5q-uc.a.run.app)** | Deployed on Google Cloud Run
 
 [Why KachowAI?](#why-kachowai) • [NVIDIA Tech](#nvidia-technology-integration) • [Get Started](#getting-started)
 
 </div>
+
+---
+
+---
+
+## 🌐 Try It Now
+
+**Live Demo**: [https://kachowai-5e4eyxuy5q-uc.a.run.app](https://kachowai-5e4eyxuy5q-uc.a.run.app)
+
+Experience voice-first AI pair programming in your browser. No installation required.
 
 ---
 
@@ -424,7 +436,7 @@ We're building the voice layer for coding. If you believe in this vision:
 - **[GTC Contest Info](https://developer.nvidia.com/gtc-golden-ticket-contest)** - Contest details and rules
 
 ### Project Resources
-- **[Live Demo](#)** - Try KachowAI in action
+- **[Live Demo](https://kachowai-5e4eyxuy5q-uc.a.run.app)** - Try KachowAI in action (deployed on Cloud Run)
 - **[Video Walkthrough](#)** - See how it works
 - **[GitHub Repo](https://github.com/SAMK-online/KachowAIGTC)** - Source code and setup
 
@@ -475,7 +487,7 @@ MIT License - Free to use, modify, and build upon.
 
 Stop reading tutorials. Start having conversations.
 
-**[Get Started Now](#getting-started)** • **[Try Demo](#)** • **[Contest Info](https://developer.nvidia.com/gtc-golden-ticket-contest)**
+**[Get Started Now](#getting-started)** • **[Try Live Demo](https://kachowai-5e4eyxuy5q-uc.a.run.app)** • **[Contest Info](https://developer.nvidia.com/gtc-golden-ticket-contest)**
 
 ---
 
