@@ -6,11 +6,32 @@
 
 **Stop typing. Start talking. Master algorithms with an AI mentor that understands your code and teaches through natural conversation.**
 
+---
+
+## 🎟️ NVIDIA GTC Golden Ticket Contest Submission
+
+**Open-source AI pair programming mentor powered by NVIDIA NIM and Riva**
+
+[![NVIDIA NIM](https://img.shields.io/badge/Powered_by-NVIDIA_NIM-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://build.nvidia.com/)
+[![NVIDIA Riva](https://img.shields.io/badge/Voice-NVIDIA_Riva-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://www.nvidia.com/en-us/ai-data-science/products/riva/)
+[![GTC 2026](https://img.shields.io/badge/GTC_2026-Contest_Entry-76B900?style=for-the-badge)](https://developer.nvidia.com/gtc-golden-ticket-contest)
+
+**Built for**: [NVIDIA GTC Golden Ticket Developer Contest](https://developer.nvidia.com/gtc-golden-ticket-contest?ncid=so-twit-669129&linkId=100000404698236#section-how-to-enter)  
+**Challenge**: Open-source project built with NVIDIA technology (NIM API + Riva TTS)  
+**Submission Period**: January 27 – February 15, 2026
+
+### 🚀 NVIDIA Technology Stack
+- **🧠 LLM**: NVIDIA NIM - Llama 3.1 70B Instruct (128K context, sub-second response)
+- **🎤 Voice**: NVIDIA Riva TTS (enterprise-grade voice synthesis)
+- **☁️ Infrastructure**: Deployed on Google Cloud Run with auto-scaling
+
+---
+
 [![Try Demo](https://img.shields.io/badge/Try-Live_Demo-brightgreen.svg)](#getting-started)
 [![Watch Video](https://img.shields.io/badge/Watch-Demo_Video-red.svg)](#)
 [![Get Started](https://img.shields.io/badge/Get-Started-blue.svg)](#getting-started)
 
-[Why KachowAI?](#why-kachowai) • [See It In Action](#how-it-works) • [Get Started](#getting-started)
+[Why KachowAI?](#why-kachowai) • [NVIDIA Tech](#nvidia-technology-integration) • [Get Started](#getting-started)
 
 </div>
 
@@ -53,11 +74,83 @@ Think of it as having a senior engineer sitting next to you—one who's patient,
 ### 🎓 Socratic Teaching Method
 **Learn, don't just copy.** KachowAI never gives you the answer upfront. Instead, it asks the right questions to help you discover the solution yourself. This is how you actually learn.
 
-### ⚡ Powered by Cutting-Edge AI
-**Fast enough to feel real.** Gemini 2.5 Flash delivers instant responses with deep reasoning—no awkward pauses, just natural conversation flow.
+### ⚡ Powered by NVIDIA NIM
+**Enterprise-grade AI that feels instant.** NVIDIA's Llama 3.1 70B model delivers sub-second responses with 128K context window—perfect for understanding entire codebases.
 
 ### 🚀 Seamless Experience
 **Works where you work.** No new IDE, no complex setup. Just code in your favorite editor while talking to your AI mentor.
+
+---
+
+## 🎮 NVIDIA Technology Integration
+
+### Why NVIDIA NIM?
+
+KachowAI leverages **NVIDIA NIM (NVIDIA Inference Microservices)** to deliver production-grade AI performance:
+
+**🚀 Performance**
+- **Sub-second latency**: < 1s response time for real-time conversations
+- **128K context window**: Understands your entire codebase at once
+- **70B parameters**: Deep reasoning for complex algorithm problems
+
+**🏢 Enterprise-Ready**
+- **Scalable infrastructure**: Built on NVIDIA's optimized inference stack
+- **24/7 availability**: Production-grade reliability
+- **Cost-effective**: Efficient resource utilization
+
+**🎤 NVIDIA Riva Integration**
+- **Natural voice synthesis**: Enterprise-grade text-to-speech
+- **Low latency**: Smooth conversational experience
+- **High quality**: Professional-sounding AI mentor
+
+### Technical Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│  Frontend (Voice + Code Editor)                 │
+│  ├─ Web Speech API (Speech Recognition)         │
+│  └─ Real-time WebSocket Connection              │
+└─────────────────────────────────────────────────┘
+                      ↓
+┌─────────────────────────────────────────────────┐
+│  FastAPI Backend                                │
+│  ├─ File Watcher (Auto Context Updates)         │
+│  ├─ Code Execution Engine                       │
+│  └─ Intelligent Prompt Engineering              │
+└─────────────────────────────────────────────────┘
+                      ↓
+┌─────────────────────────────────────────────────┐
+│  NVIDIA NIM API (build.nvidia.com)              │
+│  └─ meta/llama-3.1-70b-instruct                 │
+│     • 128K context                              │
+│     • Sub-second latency                        │
+│     • Optimized for inference                   │
+└─────────────────────────────────────────────────┘
+                      ↓
+┌─────────────────────────────────────────────────┐
+│  NVIDIA Riva TTS (Optional)                     │
+│  └─ Enterprise voice synthesis                  │
+│     • Natural speech output                     │
+│     • Low latency streaming                     │
+└─────────────────────────────────────────────────┘
+```
+
+### Impact & Innovation
+
+**🎓 Educational Impact**
+- Makes advanced AI accessible for learning
+- Natural voice interface removes barriers to entry
+- Real-time feedback accelerates skill development
+
+**🔧 Technical Innovation**
+- Intelligent echo cancellation for voice conversations
+- Automatic code context extraction via file watching
+- Socratic teaching system built on LLM reasoning
+
+**🌍 Open Source Contribution**
+- Fully open-source implementation
+- Demonstrates NVIDIA NIM integration patterns
+- Educational resource for AI developers
 
 ---
 
@@ -121,19 +214,26 @@ Stuck on a problem? No more hours of Googling. Get personalized guidance that ad
 
 **1. Clone & Install**
 ```bash
-git clone https://github.com/SAMK-online/KachowAI.git
-cd KachowAI
+git clone https://github.com/SAMK-online/KachowAIGTC.git
+cd KachowAIGTC
 cd backend && pip install -r requirements.txt
 ```
 
-**2. Add Your API Key**
+**2. Add Your NVIDIA API Key**
 ```bash
 # Create .env file
 cp .env.example .env
 
-# Add your Gemini API key (get it free at ai.google.dev)
-GEMINI_API_KEY=your_key_here
+# Add your NVIDIA API key (get it free at build.nvidia.com)
+NVIDIA_API_KEY=your_key_here
+NVIDIA_MODEL=meta/llama-3.1-70b-instruct
 WORKSPACE_DIR=/path/to/your/code
+
+# Optional: Add NVIDIA Riva for enterprise TTS
+# RIVA_FUNCTION_ID=your_riva_function_id
+
+# Optional: Add ElevenLabs for voice (fallback)
+# ELEVENLABS_API_KEY=your_key_here
 ```
 
 **3. Launch**
@@ -142,7 +242,7 @@ uvicorn app:app --reload --port 8000
 # Open http://localhost:8000
 ```
 
-**That's it! Click the mic button and start learning.**
+**That's it! Click the mic button and start learning with NVIDIA-powered AI.**
 
 ---
 
@@ -314,10 +414,15 @@ We're building the voice layer for coding. If you believe in this vision:
 
 ## 📚 Resources
 
-- **[Quick Start Guide](QUICK_START.md)** - Get up and running in 5 minutes
-- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Deploy to production
-- **[Voice Setup](TTS_SETUP_GUIDE.md)** - Configure voice settings
-- **[API Documentation](#)** - Build on top of KachowAI
+### NVIDIA Resources
+- **[NVIDIA NIM Documentation](https://build.nvidia.com/)** - Get your free API key
+- **[NVIDIA Riva](https://www.nvidia.com/en-us/ai-data-science/products/riva/)** - Learn about enterprise voice AI
+- **[GTC Contest Info](https://developer.nvidia.com/gtc-golden-ticket-contest)** - Contest details and rules
+
+### Project Resources
+- **[Live Demo](#)** - Try KachowAI in action
+- **[Video Walkthrough](#)** - See how it works
+- **[GitHub Repo](https://github.com/SAMK-online/KachowAIGTC)** - Source code and setup
 
 ---
 
@@ -325,9 +430,31 @@ We're building the voice layer for coding. If you believe in this vision:
 
 Have questions? We're here to help:
 
-- 💬 **[GitHub Discussions](https://github.com/SAMK-online/KachowAI/discussions)** - Ask questions, share tips
-- 🐛 **[GitHub Issues](https://github.com/SAMK-online/KachowAI/issues)** - Report bugs, request features
+- 💬 **[GitHub Discussions](https://github.com/SAMK-online/KachowAIGTC/discussions)** - Ask questions, share tips
+- 🐛 **[GitHub Issues](https://github.com/SAMK-online/KachowAIGTC/issues)** - Report bugs, request features
 - 📧 **Email** - Reach out directly for support
+
+---
+
+## 🎟️ About This Contest Submission
+
+**Project**: KachowAI - Voice-First AI Pair Programming Mentor  
+**Contest**: [NVIDIA GTC Golden Ticket Developer Contest](https://developer.nvidia.com/gtc-golden-ticket-contest?ncid=so-twit-669129&linkId=100000404698236#section-how-to-enter)  
+**Challenge**: Open-source project built with NVIDIA technology  
+**Submission Date**: February 2026  
+
+### NVIDIA Technologies Used
+- ✅ **NVIDIA NIM** - Llama 3.1 70B Instruct for intelligent mentoring
+- ✅ **NVIDIA Riva** - Enterprise-grade voice synthesis (optional)
+- ✅ **build.nvidia.com** - NVIDIA's AI inference platform
+
+### Why This Project Matters
+KachowAI democratizes access to AI-powered coding education through:
+- **Voice-first learning** that removes barriers for developers
+- **Real-time intelligence** powered by NVIDIA's inference infrastructure
+- **Open-source implementation** that others can learn from and build upon
+
+This project showcases how NVIDIA's AI platform can transform technical education by making it more accessible, natural, and effective.
 
 ---
 
@@ -343,14 +470,23 @@ MIT License - Free to use, modify, and build upon.
 
 Stop reading tutorials. Start having conversations.
 
-**[Get Started Now](#getting-started)** • **[Watch Demo](#)** • **[View Docs](#)**
+**[Get Started Now](#getting-started)** • **[Try Demo](#)** • **[Contest Info](https://developer.nvidia.com/gtc-golden-ticket-contest)**
 
 ---
 
-**Built with ⚡ for developers who learn by doing**
+**Built with 💚 NVIDIA NIM • Powered by Llama 3.1 70B • Voice by Riva**
 
 *Stop typing. Start talking. Master coding.*
 
-⭐ Star this repo if you believe in voice-first learning
+[![Powered by NVIDIA](https://img.shields.io/badge/Powered_by-NVIDIA_NIM-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://build.nvidia.com/)
+
+⭐ **Star this repo if you believe in voice-first learning**  
+🎟️ **Follow for GTC 2026 Golden Ticket Contest updates**
+
+---
+
+**Submitted for NVIDIA GTC Golden Ticket Contest • January 27 - February 15, 2026**
+
+*Building the future of AI-powered education with NVIDIA technology*
 
 </div>
