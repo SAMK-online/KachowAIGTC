@@ -21,7 +21,7 @@
       --border: rgba(255, 255, 255, 0.08);
       --text: #ffffff;
       --text-muted: rgba(255, 255, 255, 0.6);
-      --accent: #22d3ee;
+      --accent: #76b900;
       --accent-hover: #06b6d4;
       --success: #34d399;
       --error: #ef4444;
@@ -1050,6 +1050,25 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
     async function playTTS(text, preferSpeed = true) {
       try {
         console.log('🔊 Playing TTS...');
+
+        // 🎯 AGGRESSIVELY stop recognition to prevent feedback loop
+        isTTSPlaying = true; // Set flag FIRST
+
+        // Clear any pending transcript and silence timer
+        clearSilenceTimer();
+        currentInterimTranscript = '';
+
+        // Force stop recognition and wait for it to fully stop
+        if (recognition) {
+          try {
+            recognition.abort(); // Use abort() for immediate stop
+          } catch (e) {}
+          isRecognitionRunning = false;
+          console.log('🎤 Aborted recognition for TTS');
+        }
+
+        // Small delay to ensure mic buffer is cleared
+        await new Promise(resolve => setTimeout(resolve, 100));
         
         // During voice sessions, prioritize SPEED (browser TTS)
         // For typed messages, prioritize QUALITY (ElevenLabs)
@@ -1075,6 +1094,21 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
           audio.onended = () => {
             URL.revokeObjectURL(audioUrl);
             console.log('🔊 TTS finished (ElevenLabs)');
+
+            // 🎯 Wait before clearing flag (let audio dissipate)
+            setTimeout(() => {
+              isTTSPlaying = false;
+              currentInterimTranscript = ''; // Clear any captured echo
+
+              // RESUME voice recognition after TTS finishes
+              if (isListening && shouldRestart && !isRecognitionRunning) {
+                setTimeout(() => {
+                  if (safeStartRecognition()) {
+                    console.log('🎤 Resumed recognition after TTS');
+                  }
+                }, 200);
+              }
+            }, 800); // 800ms delay after TTS ends
           };
           
           await audio.play();
@@ -1092,8 +1126,16 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
     // Clean text for natural speech (remove code quotes, backticks, etc.)
     function sanitizeTextForSpeech(text) {
       return text
+        // Remove LaTeX math delimiters ($variable$ or $$formula$$)
+        .replace(/\$\$([^\$]+)\$\$/g, '$1')  // $$formula$$ -> formula
+        .replace(/\$([^\$]+)\$/g, '$1')      // $i$ -> i
         // Remove backticks (code formatting)
         .replace(/`/g, '')
+        // Replace underscores with spaces (snake_case -> natural speech)
+        .replace(/_/g, ' ')
+        // Remove apostrophes that aren't contractions
+        .replace(/(\w)'(\w)/g, '$1$2')  // Keep contractions like "don't" -> "dont"
+        .replace(/'/g, '')  // Remove standalone apostrophes
         // Remove emphasis quotes around single words/variables
         .replace(/'(\w+)'/g, '$1')
         .replace(/"(\w+)"/g, '$1')
@@ -1102,6 +1144,13 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
         .replace(/O\(N\)/g, 'O of N')
         .replace(/O\(1\)/g, 'O of 1')
         .replace(/O\(log N\)/gi, 'O of log N')
+        .replace(/O\(n\^2\)/g, 'O of n squared')
+        .replace(/O\(n\)/g, 'O of n')
+        // Remove asterisks (markdown bold/italic)
+        .replace(/\*+/g, '')
+        // Remove brackets and parentheses around single words
+        .replace(/\[(\w+)\]/g, '$1')
+        .replace(/\((\w+)\)/g, '$1')
         // Remove extra spaces
         .replace(/\s+/g, ' ')
         .trim();
@@ -1134,10 +1183,39 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
         
         utterance.onend = () => {
           console.log('🔊 TTS finished (Browser)');
+
+          // 🎯 Wait before clearing flag and resuming (let audio dissipate)
+          setTimeout(() => {
+            isTTSPlaying = false;
+            currentInterimTranscript = ''; // Clear any captured echo
+
+            // RESUME voice recognition after TTS finishes
+            if (isListening && shouldRestart && !isRecognitionRunning) {
+              setTimeout(() => {
+                if (safeStartRecognition()) {
+                  console.log('🎤 Resumed recognition after TTS');
+                }
+              }, 200);
+            }
+          }, 800); // 800ms delay after TTS ends before listening again
         };
-        
+
         utterance.onerror = (err) => {
           console.error('Browser TTS error:', err);
+
+          setTimeout(() => {
+            isTTSPlaying = false;
+            currentInterimTranscript = '';
+
+            // RESUME recognition even on error
+            if (isListening && shouldRestart && !isRecognitionRunning) {
+              setTimeout(() => {
+                if (safeStartRecognition()) {
+                  console.log('🎤 Resumed recognition after TTS error');
+                }
+              }, 200);
+            }
+          }, 500);
         };
         
         window.speechSynthesis.speak(utterance);
@@ -1147,20 +1225,50 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
       }
     }
 
+    // Track last AI response for echo detection
+    let lastAIResponse = '';
+
+    // Check if transcript is likely an echo of AI speech
+    function isLikelyEcho(transcript) {
+      if (!lastAIResponse) return false;
+      const t = transcript.toLowerCase().trim();
+      const ai = lastAIResponse.toLowerCase();
+
+      // Check if transcript is a substring of AI response
+      if (ai.includes(t) && t.length > 10) {
+        console.log('🎤 Rejected echo (substring match):', t.substring(0, 30));
+        return true;
+      }
+
+      // Check word overlap (if >50% words match, likely echo)
+      const tWords = t.split(/\s+/);
+      const aiWords = ai.split(/\s+/);
+      const matchingWords = tWords.filter(w => aiWords.includes(w) && w.length > 2);
+
+      if (matchingWords.length / tWords.length > 0.5 && tWords.length > 3) {
+        console.log('🎤 Rejected echo (word overlap):', t.substring(0, 30));
+        return true;
+      }
+
+      return false;
+    }
+
     function handleWebSocketMessage(data) {
       const messagesContainer = document.getElementById('chat-messages');
       const empty = messagesContainer.querySelector('.chat-empty');
       if (empty) empty.remove();
 
       if (data.type === 'llm_message') {
+        lastAIResponse = data.text; // Store for echo detection
         addMessage('assistant', data.text);
-        
+
         // Auto-play TTS if in voice session
         if (isListening) {
           playTTS(data.text);
         }
       } else if (data.type === 'context_update') {
-        addMessage('system', `📝 Updated: ${data.filename}`);
+        // Context updates happen silently in the background - no need to show in chat
+        console.log(`📝 Context updated: ${data.filename}`);
       } else if (data.type === 'error') {
         addMessage('system', `❌ Error: ${data.message}`);
       }
@@ -1232,6 +1340,76 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
     let recognition = null;
     let isListening = false;
     let shouldRestart = false; // For continuous mode
+    let networkErrorCount = 0; // Track network errors
+    let isRecognitionRunning = false; // Track actual recognition state
+    let hasShownListeningMessage = false; // Track greeting message
+    let isTTSPlaying = false; // 🎯 Track when AI is speaking to prevent feedback
+    const MAX_NETWORK_ERRORS = 3; // Stop after 3 consecutive network errors
+
+    // Safe recognition start - prevents "already started" errors
+    function safeStartRecognition() {
+      if (!recognition || isRecognitionRunning) {
+        console.log('🎤 Recognition already running or not available');
+        return false;
+      }
+      try {
+        recognition.start();
+        isRecognitionRunning = true;
+        return true;
+      } catch (err) {
+        console.log('🎤 Could not start recognition:', err.message);
+        isRecognitionRunning = false;
+        return false;
+      }
+    }
+
+    // Safe recognition stop
+    function safeStopRecognition() {
+      if (!recognition) return;
+      try {
+        recognition.stop();
+      } catch (err) {
+        console.log('🎤 Recognition already stopped');
+      }
+      isRecognitionRunning = false;
+    }
+
+    // Silence detection for speech recognition
+    let silenceTimer = null;
+    let currentInterimTranscript = '';
+    const SILENCE_TIMEOUT = 1500; // 1.5 seconds of silence = send message
+
+    function clearSilenceTimer() {
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+        silenceTimer = null;
+      }
+    }
+
+    function startSilenceTimer() {
+      clearSilenceTimer();
+      silenceTimer = setTimeout(() => {
+        // Don't send if TTS is playing (prevents feedback)
+        if (isTTSPlaying) {
+          console.log('🎤 Silence timer fired but TTS playing, ignoring');
+          currentInterimTranscript = '';
+          return;
+        }
+
+        // If we have accumulated interim transcript and silence detected, send it
+        if (currentInterimTranscript.trim()) {
+          // Check for echo before sending
+          if (isLikelyEcho(currentInterimTranscript.trim())) {
+            currentInterimTranscript = '';
+            return;
+          }
+
+          console.log('🎤 Silence detected, sending:', currentInterimTranscript.trim());
+          sendMessage(currentInterimTranscript.trim());
+          currentInterimTranscript = '';
+        }
+      }, SILENCE_TIMEOUT);
+    }
 
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1244,9 +1422,17 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
       recognition.onstart = () => {
         isListening = true;
         shouldRestart = true;
+        isRecognitionRunning = true;
+        networkErrorCount = 0; // Reset error count on successful start
+        currentInterimTranscript = ''; // Reset transcript
         console.log('🎤 Listening... speak naturally!');
-        addMessage('system', '🎤 Listening... speak naturally!');
-        
+
+        // Only show message once per session
+        if (!hasShownListeningMessage) {
+          addMessage('system', '🎤 Listening... speak naturally! (pauses send messages)');
+          hasShownListeningMessage = true;
+        }
+
         // Update button text
         const btn = document.getElementById('voice-btn');
         if (btn) {
@@ -1255,80 +1441,130 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
       };
 
       recognition.onresult = (event) => {
+        // 🎯 IGNORE all input while TTS is playing (prevent feedback loop)
+        if (isTTSPlaying) {
+          console.log('🎤 Ignoring input while AI is speaking');
+          return;
+        }
+
         let interimTranscript = '';
         let finalTranscript = '';
 
+        networkErrorCount = 0; // Reset on successful speech recognition
+
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
+
           if (event.results[i].isFinal) {
             finalTranscript += transcript + ' ';
+            console.log(`🎤 Final result: "${transcript}"`);
           } else {
             interimTranscript += transcript;
           }
         }
 
-        // Show interim results in real-time (optional visual feedback)
-        if (interimTranscript) {
-          console.log('🎤 Hearing:', interimTranscript);
+        // If we got a final transcript from browser, send it immediately
+        if (finalTranscript.trim()) {
+          clearSilenceTimer();
+          currentInterimTranscript = '';
+
+          // Check for echo before sending
+          if (isLikelyEcho(finalTranscript.trim())) {
+            return; // Skip echoed text
+          }
+
+          console.log('🎤 Browser final, sending:', finalTranscript.trim());
+          sendMessage(finalTranscript.trim());
+          return;
         }
 
-        // Send final transcript as message
-        if (finalTranscript.trim()) {
-          console.log('🎤 Final:', finalTranscript.trim());
-          sendMessage(finalTranscript.trim());
+        // Update interim transcript and start/reset silence timer
+        if (interimTranscript) {
+          currentInterimTranscript = interimTranscript;
+          console.log('🎤 Hearing:', interimTranscript.substring(0, 50) + (interimTranscript.length > 50 ? '...' : ''));
+          startSilenceTimer(); // Reset timer on each new speech
         }
       };
 
       recognition.onerror = (event) => {
         console.error('🎤 Speech recognition error:', event.error);
         
-        // Only stop on critical errors
+        // Only stop on critical permission errors
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           isListening = false;
           shouldRestart = false;
+          networkErrorCount = 0;
           document.querySelectorAll('.listening').forEach(btn => {
             btn.classList.remove('listening');
           });
           addMessage('system', `❌ Microphone access denied. Please allow microphone permissions.`);
         } else if (event.error === 'network') {
-          isListening = false;
-          shouldRestart = false;
-          document.querySelectorAll('.listening').forEach(btn => {
-            btn.classList.remove('listening');
-          });
-          addMessage('system', `❌ Network error. Check your connection.`);
-        }
-        // Ignore 'no-speech' and 'aborted' - these are normal in continuous mode
-      };
-
-      recognition.onend = () => {
-        console.log('🎤 Recognition ended, shouldRestart:', shouldRestart);
-        
-        // Auto-restart if we're in continuous mode and haven't manually stopped
-        if (shouldRestart && isListening) {
-          console.log('🎤 Auto-restarting...');
-          try {
-            recognition.start();
-          } catch (err) {
-            console.error('Failed to restart recognition:', err);
+          networkErrorCount++;
+          console.log(`🎤 Network error count: ${networkErrorCount}/${MAX_NETWORK_ERRORS}`);
+          
+          if (networkErrorCount >= MAX_NETWORK_ERRORS) {
             isListening = false;
             shouldRestart = false;
+            networkErrorCount = 0;
             document.querySelectorAll('.listening').forEach(btn => {
               btn.classList.remove('listening');
             });
+            addMessage('system', `❌ Speech recognition network error. Try: 1) Check internet connection 2) Use Chrome 3) Reload page 4) Check microphone permissions`);
           }
+        } else {
+          // Reset counter on non-network errors
+          networkErrorCount = 0;
+        }
+      };
+
+      recognition.onend = () => {
+        isRecognitionRunning = false;
+        clearSilenceTimer(); // Clear any pending silence timer
+        console.log('🎤 Recognition ended, shouldRestart:', shouldRestart, 'isListening:', isListening);
+
+        // If there's pending interim transcript, send it before restarting
+        if (currentInterimTranscript.trim() && shouldRestart && isListening) {
+          console.log('🎤 Sending pending transcript before restart:', currentInterimTranscript.trim());
+          sendMessage(currentInterimTranscript.trim());
+          currentInterimTranscript = '';
+        }
+
+        // Auto-restart if we're in continuous mode and haven't manually stopped
+        if (shouldRestart && isListening) {
+          console.log('🎤 Auto-restarting in 500ms...');
+          // Add a small delay to prevent rapid restart loops
+          setTimeout(() => {
+            if (shouldRestart && isListening && !isRecognitionRunning) {
+              if (!safeStartRecognition()) {
+                // Try one more time after a longer delay
+                setTimeout(() => {
+                  if (shouldRestart && isListening && !isRecognitionRunning) {
+                    if (!safeStartRecognition()) {
+                      console.error('Failed to restart after retry');
+                      isListening = false;
+                      shouldRestart = false;
+                      document.querySelectorAll('.listening').forEach(btn => {
+                        btn.classList.remove('listening');
+                      });
+                      addMessage('system', '❌ Voice session failed. Please try again.');
+                    }
+                  }
+                }, 2000);
+              }
+            }
+          }, 500);
         } else {
           isListening = false;
           document.querySelectorAll('.listening').forEach(btn => {
             btn.classList.remove('listening');
           });
-          
+
           // Reset button text
           const btn = document.getElementById('voice-btn');
           if (btn) {
             btn.innerHTML = '🎤 Start Voice Session';
           }
-          
+
           if (!shouldRestart) {
             addMessage('system', '🎤 Stopped listening');
           }
@@ -1351,33 +1587,42 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
         console.log('🎤 User stopped voice session');
         shouldRestart = false;
         isListening = false;
-        try {
-          recognition.stop();
-          document.querySelectorAll('.listening').forEach(btn => {
-            btn.classList.remove('listening');
-          });
-        } catch (err) {
-          console.error('Failed to stop recognition:', err);
+        networkErrorCount = 0; // Reset error count
+        hasShownListeningMessage = false; // Reset for next session
+        clearSilenceTimer(); // Clear any pending silence timer
+        currentInterimTranscript = ''; // Clear any pending transcript
+
+        // Stop any playing TTS
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+
+        safeStopRecognition();
+        document.querySelectorAll('.listening').forEach(btn => {
+          btn.classList.remove('listening');
+        });
+
+        // Update button text
+        const btn = document.getElementById('voice-btn');
+        if (btn) {
+          btn.innerHTML = '🎤 Start Voice Session';
         }
       } else {
         // Start listening
         console.log('🎤 User started voice session');
-        try {
-          shouldRestart = true;
-          document.querySelectorAll('#voice-btn, #voice-toggle-btn').forEach(btn => {
-            btn.classList.add('listening');
-          });
-          recognition.start();
-          
+        shouldRestart = true;
+        document.querySelectorAll('#voice-btn, #voice-toggle-btn').forEach(btn => {
+          btn.classList.add('listening');
+        });
+
+        if (safeStartRecognition()) {
           // AI greets user first!
           setTimeout(() => {
             const greeting = "Hi! I'm Kachow, your AI pair programming mentor. How can I help you today?";
             addMessage('assistant', greeting);
             playTTS(greeting);
           }, 1000); // Wait 1 second for mic to be ready
-          
-        } catch (err) {
-          console.error('Failed to start recognition:', err);
+        } else {
           document.querySelectorAll('.listening').forEach(btn => {
             btn.classList.remove('listening');
           });
@@ -1407,6 +1652,28 @@ print(max_profit([7,1,5,3,6,4]))  # Expected: 5`,
           </div>
         `;
         document.getElementById('code-editor').value = '';
+      }
+    });
+
+    // Hide/Show conversation panel
+    let chatHidden = false;
+    document.getElementById('hide-chat-btn').addEventListener('click', () => {
+      const rightSidebar = document.querySelector('.right-sidebar');
+      const mainEditor = document.querySelector('.main-editor');
+      const hideBtn = document.getElementById('hide-chat-btn');
+      
+      if (chatHidden) {
+        // Show chat
+        rightSidebar.style.display = 'flex';
+        mainEditor.style.marginRight = '400px';
+        hideBtn.innerHTML = '⬅️ Hide';
+        chatHidden = false;
+      } else {
+        // Hide chat
+        rightSidebar.style.display = 'none';
+        mainEditor.style.marginRight = '0';
+        hideBtn.innerHTML = '➡️ Show';
+        chatHidden = true;
       }
     });
 

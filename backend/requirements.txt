@@ -2,5 +2,7 @@ fastapi
 uvicorn[standard]
 httpx
 python-dotenv
-google-generativeai
+openai              # For NVIDIA NIM (OpenAI-compatible)
+nvidia-riva-client  # For NVIDIA Riva TTS/ASR
+grpcio              # Required for Riva gRPC
 watchdog

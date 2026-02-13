@@ -21,7 +21,7 @@
       --border: rgba(255, 255, 255, 0.08);
       --text: #ffffff;
       --text-muted: rgba(255, 255, 255, 0.6);
-      --accent: #22d3ee;
+      --accent: #76b900;
       --accent-hover: #06b6d4;
       --success: #34d399;
       --error: #ef4444;
@@ -520,6 +520,36 @@
       animation: pulse 1s ease-in-out infinite;
     }
 
+    /* Show Chat Button (when hidden) */
+    .show-chat-btn {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      padding: 12px 20px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .show-chat-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .right-sidebar.hidden {
+      display: none;
+    }
+
+    .main-layout.chat-hidden {
+      grid-template-columns: 320px 1fr;
+    }
+
     /* Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
@@ -610,8 +640,11 @@
     </div>
   </nav>
 
+  <!-- Show Chat Button (appears when chat is hidden) -->
+  <button class="show-chat-btn" id="show-chat-btn">💬 Show Chat</button>
+
   <!-- Main Layout -->
-  <div class="main-layout">
+  <div class="main-layout" id="main-layout">
     <!-- Left Sidebar: Problem Selector -->
     <div class="left-sidebar">
       <div class="sidebar-header">
@@ -756,6 +789,7 @@ def two_sum(nums, target):
 
     let socket = null;
     let isConnected = false;
+    let currentAudio = null;  // Track current audio for stopping
 
     function connectWebSocket() {
       socket = new WebSocket(wsUrl);
@@ -792,10 +826,54 @@ def two_sum(nums, target):
 
       if (data.type === 'llm_message') {
         addMessage('assistant', data.text);
+        // Auto-play TTS for assistant messages
+        playTTS(data.text);
       } else if (data.type === 'context_update') {
-        addMessage('system', `📝 Updated: ${data.filename}`);
+        // Context updates happen silently in the background - no need to show in chat
+        console.log(`📝 Context updated: ${data.filename}`);
       } else if (data.type === 'error') {
         addMessage('system', `❌ Error: ${data.message}`);
+      }
+    }
+
+    // TTS playback with stop capability
+    async function playTTS(text) {
+      // Stop any currently playing audio
+      stopAudio();
+
+      try {
+        const response = await fetch('/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text })
+        });
+
+        if (!response.ok) {
+          console.error('TTS failed:', response.statusText);
+          return;
+        }
+
+        const blob = await response.blob();
+        const audioUrl = URL.createObjectURL(blob);
+
+        currentAudio = new Audio(audioUrl);
+        currentAudio.play();
+
+        currentAudio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          currentAudio = null;
+        };
+      } catch (error) {
+        console.error('TTS error:', error);
+      }
+    }
+
+    // Stop audio playback
+    function stopAudio() {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
       }
     }
 
@@ -900,6 +978,7 @@ def two_sum(nums, target):
     // Reset button
     document.getElementById('reset-btn').addEventListener('click', () => {
       if (confirm('Reset conversation and code?')) {
+        stopAudio();  // Stop any playing audio
         document.getElementById('chat-messages').innerHTML = `
           <div class="chat-empty">
             <div class="chat-empty-icon">💬</div>
@@ -910,6 +989,45 @@ def two_sum(nums, target):
           </div>
         `;
         document.getElementById('code-editor').value = '';
+      }
+    });
+
+    // Hide/Show Chat functionality
+    const rightSidebar = document.querySelector('.right-sidebar');
+    const mainLayout = document.getElementById('main-layout');
+    const showChatBtn = document.getElementById('show-chat-btn');
+    const hideChatBtn = document.getElementById('hide-chat-btn');
+
+    hideChatBtn.addEventListener('click', () => {
+      rightSidebar.classList.add('hidden');
+      mainLayout.classList.add('chat-hidden');
+      showChatBtn.style.display = 'block';
+    });
+
+    showChatBtn.addEventListener('click', () => {
+      rightSidebar.classList.remove('hidden');
+      mainLayout.classList.remove('chat-hidden');
+      showChatBtn.style.display = 'none';
+    });
+
+    // Stop Audio button (add to voice session button)
+    let isVoiceSessionActive = false;
+    const mainVoiceBtn = document.getElementById('voice-btn');
+
+    mainVoiceBtn.addEventListener('click', () => {
+      if (isVoiceSessionActive) {
+        // Stop voice session and audio
+        stopAudio();
+        if (recognition) recognition.stop();
+        mainVoiceBtn.textContent = '🎤 Start Voice Session';
+        mainVoiceBtn.classList.remove('listening');
+        isVoiceSessionActive = false;
+        addMessage('system', '🔇 Voice session stopped');
+      } else {
+        // Start voice session
+        mainVoiceBtn.textContent = '⏹️ Stop Voice';
+        isVoiceSessionActive = true;
+        addMessage('system', '🎤 Voice session started - Hold the mic button to speak');
       }
     });
 

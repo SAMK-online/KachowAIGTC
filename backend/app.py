@@ -5,17 +5,25 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set
 from datetime import datetime
 
-import google.generativeai as genai
+from openai import AsyncOpenAI
 import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import subprocess
 import tempfile
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+
+# Optional Riva imports (for TTS)
+try:
+    import riva.client
+    RIVA_AVAILABLE = True
+except ImportError:
+    RIVA_AVAILABLE = False
+    print("⚠️  nvidia-riva-client not installed. Riva TTS unavailable.")
 
 
 load_dotenv()
@@ -37,90 +45,63 @@ if FRONTEND_DIR.exists():
 
 
 # Configuration
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-pro-latest")
+# NVIDIA API (primary)
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
+NVIDIA_MODEL = os.getenv("NVIDIA_MODEL", "meta/llama-3.1-70b-instruct")
+RIVA_FUNCTION_ID = os.getenv("RIVA_FUNCTION_ID")
+
+# ElevenLabs (fallback TTS)
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID")
 
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# Initialize NVIDIA NIM client (OpenAI-compatible)
+nvidia_client = None
+if NVIDIA_API_KEY:
+    nvidia_client = AsyncOpenAI(
+        base_url="https://integrate.api.nvidia.com/v1",
+        api_key=NVIDIA_API_KEY
+    )
+    print(f"✅ NVIDIA NIM configured with model: {NVIDIA_MODEL}")
 
-SYSTEM_PROMPT = """You are an expert coding mentor for LeetCode-style problems, focused on teaching through guided discovery.
+SYSTEM_PROMPT = """You are my Socratic DSA mentor. You ONLY ask questions - you NEVER give answers.
 
-STRICT RULES YOU MUST FOLLOW:
-❌ Do NOT provide complete solutions or full code unless explicitly asked with phrases like "give me the solution" or "show me the code"
-❌ Do NOT jump to the final algorithm immediately
-❌ Do NOT assume missing constraints — always ask first
-❌ NEVER ask users to "paste their code" - you can ALREADY see it automatically!
+⛔ ABSOLUTE RULES - NEVER BREAK:
+1. NEVER state the time/space complexity - ASK what they think it is
+2. NEVER suggest data structures - ASK what data structure might help
+3. NEVER explain the algorithm - ASK questions that lead them to discover it
+4. NEVER give code unless they say "give me the solution"
+5. MAXIMUM 2 sentences. ONE question only.
 
-CODE CONTEXT AWARENESS:
-✅ You ALWAYS have access to the user's code automatically in the "Code context" section
-✅ When a user says "look at my code" or "I have an implementation" - CHECK the code context immediately
-✅ DO NOT ask them to paste code - you can already see it!
-✅ Reference their code directly: "I see you're using a hash map here..."
-✅ If no code is provided in the context, you can ask them to type it in the editor
-✅ The code updates automatically as they type
+🎯 YOUR ONLY JOB: Ask short guiding questions.
 
-YOUR RESPONSIBILITIES:
-1. START by asking clarifying questions about:
-   - Input constraints (size, range, special cases)
-   - Output format and expectations
-   - Edge cases they're considering
-   - Time/space complexity requirements
+📋 QUESTION PROGRESSION:
+1. First ask about constraints and edge cases
+2. Ask what approach they're considering
+3. If wrong, ask "what would happen if..." to expose the flaw
+4. Ask what data structure could help (don't name it!)
+5. Ask about complexity only AFTER they state theirs
 
-2. GUIDE them to identify the core pattern:
-   - Ask: "What patterns do you see here?"
-   - Hint at categories: two pointers, sliding window, DP, graph, greedy, hash map, etc.
-   - Let THEM make the connection
+⚠️ WHEN THEY'RE WRONG:
+- First time wrong: Ask a question that hints at the issue
+- Second time wrong: Ask a more direct question
+- Third time wrong: You may give a small hint (not the answer)
+- ONLY give the answer if they explicitly ask
 
-3. BREAK problems into small logical steps:
-   - Give progressive hints, not answers
-   - Ask: "What would be your first step?"
-   - Validate their thinking before moving forward
+✅ GOOD (questions only):
+- "What's your initial approach?"
+- "What would the time complexity be with nested loops?"
+- "Is there a data structure that could speed up lookups?"
+- "What edge case might break this?"
 
-4. LET THEM propose the approach first:
-   - Ask: "How would you approach this?"
-   - Listen to their ideas before offering guidance
-   - Build on their thinking
+❌ NEVER SAY THESE:
+- "The time complexity is O of N squared" (WRONG - ask them!)
+- "You could use a hash table" (WRONG - ask what structure helps!)
+- "That's O of N time" (WRONG - let them figure it out!)
+- "Here's how it works..." (WRONG - no explanations!)
 
-5. IF their approach is wrong or inefficient:
-   - Explain WHY it won't work (with examples)
-   - Gently redirect: "Have you considered...?"
-   - Don't just give the right answer
+🗣️ VOICE: Short, natural, no code formatting. Say "O of N" not "O(N)".
 
-6. HIGHLIGHT edge cases and pitfalls:
-   - Ask: "What could go wrong here?"
-   - Point out common mistakes without solving them
-   - Let them figure out the fix
-
-7. ONLY when they explicitly say "give me the optimized solution" or similar, provide:
-   - The final algorithm explanation
-   - Clean, well-commented code
-   - Time and space complexity analysis
-   - Trade-offs and alternatives
-
-COMMUNICATION STYLE:
-- Keep responses SHORT for voice playback (1-3 sentences max)
-- Ask ONE question at a time, then WAIT for their response
-- DO NOT ask multiple questions in one response
-- After they answer, ask the NEXT question
-- Think: natural conversation, not an interview
-- Use the provided code context to reference their actual work
-- Be encouraging and collaborative, not condescending
-- Think like a pair programming partner, not a teacher lecturing
-
-VOICE CONVERSATION RULES:
-- ONE question per response (very important!)
-- Keep it conversational and natural
-- Let them answer before asking more
-- Build on their previous answer
-- Short, focused exchanges work best for voice
-- Avoid using quotes/backticks for emphasis - say words naturally instead
-- Example: Say "the nums array" NOT "the 'nums' array"
-- Example: Say "O of N squared" NOT "O(N^2)"
-
-Remember: Your goal is to make them THINK, not to make them COPY. Guide, don't solve. ONE question at a time!
-"""
+Remember: If you catch yourself about to STATE something, turn it into a QUESTION instead."""
 
 # File extensions to watch
 WATCHED_EXTENSIONS = {'.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c', '.go', '.rs', '.rb', '.php', '.swift', '.kt'}
@@ -240,8 +221,53 @@ def get_current_context() -> str:
     return "\n\n".join(context_parts)
 
 
-async def synthesize_tts(text: str, voice_id: Optional[str] = None):
-    """Stream audio bytes from ElevenLabs."""
+async def synthesize_tts_riva(text: str, voice: str = "English-US.Female-1") -> bytes:
+    """Synthesize speech using NVIDIA Riva TTS."""
+    if not RIVA_AVAILABLE:
+        raise HTTPException(status_code=400, detail="Riva TTS not available (nvidia-riva-client not installed)")
+
+    if not NVIDIA_API_KEY or not RIVA_FUNCTION_ID:
+        raise HTTPException(status_code=400, detail="Riva TTS not configured (NVIDIA_API_KEY and RIVA_FUNCTION_ID required)")
+
+    try:
+        # Create Riva auth for NVIDIA API Catalog
+        metadata = [
+            ("function-id", RIVA_FUNCTION_ID),
+            ("authorization", f"Bearer {NVIDIA_API_KEY}")
+        ]
+
+        auth = riva.client.Auth(
+            ssl_cert=None,
+            use_ssl=True,
+            uri="grpc.nvcf.nvidia.com:443",
+            metadata_args=metadata
+        )
+
+        tts_service = riva.client.SpeechSynthesisService(auth)
+
+        # Synthesize audio
+        responses = tts_service.synthesize_online(
+            text=text,
+            voice_name=voice,
+            language_code="en-US",
+            sample_rate_hz=22050,
+            encoding=riva.client.AudioEncoding.LINEAR_PCM
+        )
+
+        # Collect all audio chunks
+        audio_bytes = b""
+        for response in responses:
+            audio_bytes += response.audio
+
+        return audio_bytes
+
+    except Exception as e:
+        print(f"Riva TTS error: {e}")
+        raise HTTPException(status_code=500, detail=f"Riva TTS failed: {str(e)}")
+
+
+async def synthesize_tts_elevenlabs(text: str, voice_id: Optional[str] = None):
+    """Stream audio bytes from ElevenLabs (fallback)."""
     if not ELEVENLABS_API_KEY:
         raise HTTPException(
             status_code=400,
@@ -264,8 +290,8 @@ async def synthesize_tts(text: str, voice_id: Optional[str] = None):
         "voice_settings": {
             "stability": 0.3,
             "similarity_boost": 0.7,
-            "speed": 1.1,  # 🎯 Slightly faster (1.0 = normal, 1.1 = 10% faster)
-            "style": 0.2,  # Slightly more expressive
+            "speed": 1.1,
+            "style": 0.2,
         },
     }
 
@@ -284,33 +310,58 @@ async def synthesize_tts(text: str, voice_id: Optional[str] = None):
     return audio_bytes()
 
 
-async def call_gemini(
+async def synthesize_tts(text: str, voice_id: Optional[str] = None):
+    """Unified TTS: Try Riva first, fallback to ElevenLabs."""
+    # Try Riva first if configured
+    if NVIDIA_API_KEY and RIVA_FUNCTION_ID and RIVA_AVAILABLE:
+        try:
+            audio_data = await synthesize_tts_riva(text, voice_id or "English-US.Female-1")
+            return audio_data, "audio/wav"  # Riva returns WAV
+        except Exception as e:
+            print(f"⚠️  Riva TTS failed, falling back to ElevenLabs: {e}")
+
+    # Fallback to ElevenLabs
+    if ELEVENLABS_API_KEY:
+        stream = await synthesize_tts_elevenlabs(text, voice_id)
+        return stream, "audio/mpeg"  # ElevenLabs returns MP3
+
+    raise HTTPException(status_code=400, detail="No TTS service configured")
+
+
+async def call_llm(
     user_text: str,
     code_context: Optional[str],
     history: List[Dict[str, str]],
 ) -> str:
-    if not GEMINI_API_KEY:
-        raise HTTPException(status_code=400, detail="GEMINI_API_KEY is not set.")
+    """Call NVIDIA Nemotron via NIM API (OpenAI-compatible)."""
+    if not nvidia_client:
+        raise HTTPException(status_code=400, detail="NVIDIA_API_KEY is not set.")
 
     # Use auto-tracked context if no manual context provided
     if not code_context:
         code_context = get_current_context()
 
-    # Build a simple prompt using history and context.
-    history_text = "\n".join(
-        [f"User: {item['user']}\nAssistant: {item['assistant']}" for item in history]
-    )
+    # Build messages array for chat completion
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+    # Add conversation history
+    for item in history:
+        messages.append({"role": "user", "content": item["user"]})
+        messages.append({"role": "assistant", "content": item["assistant"]})
+
+    # Add context and current message
     context_block = f"\nCode context:\n{code_context}\n" if code_context else ""
-    prompt = (
-        f"{SYSTEM_PROMPT}\n"
-        f"{context_block}"
-        f"{'Conversation so far:\n' + history_text + '\n' if history else ''}"
-        f"Latest user message: {user_text}"
+    messages.append({"role": "user", "content": f"{context_block}{user_text}"})
+
+    # Call NVIDIA NIM
+    response = await nvidia_client.chat.completions.create(
+        model=NVIDIA_MODEL,
+        messages=messages,
+        temperature=0.5,  # Lower for more focused responses
+        max_tokens=150    # Limit to encourage short responses
     )
 
-    model = genai.GenerativeModel(GEMINI_MODEL)
-    response = await asyncio.to_thread(model.generate_content, prompt)
-    return response.text
+    return response.choices[0].message.content
 
 
 @app.websocket("/ws")
@@ -351,7 +402,7 @@ async def chat_ws(websocket: WebSocket):
 
                 await websocket.send_json({"type": "status", "message": "thinking"})
                 try:
-                    reply = await call_gemini(user_text, code_context, history)
+                    reply = await call_llm(user_text, code_context, history)
                 except HTTPException as exc:
                     await websocket.send_json({"type": "error", "message": exc.detail})
                     continue
@@ -361,7 +412,7 @@ async def chat_ws(websocket: WebSocket):
 
                 history.append({"user": user_text, "assistant": reply})
                 await websocket.send_json({"type": "llm_message", "text": reply})
-            
+
             elif msg_type == "request_context":
                 # Client requesting current context
                 await websocket.send_json({
@@ -381,8 +432,13 @@ async def chat_ws(websocket: WebSocket):
 
 @app.post("/tts")
 async def tts_endpoint(req: TtsRequest):
-    stream = await synthesize_tts(req.text, req.voice_id)
-    return StreamingResponse(stream, media_type="audio/mpeg")
+    result, media_type = await synthesize_tts(req.text, req.voice_id)
+
+    # Riva returns bytes, ElevenLabs returns async generator
+    if isinstance(result, bytes):
+        return Response(content=result, media_type=media_type)
+    else:
+        return StreamingResponse(result, media_type=media_type)
 
 
 @app.get("/health")
@@ -391,7 +447,9 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "KachowAI",
-        "gemini_configured": bool(GEMINI_API_KEY),
+        "nvidia_llm_configured": bool(NVIDIA_API_KEY),
+        "nvidia_model": NVIDIA_MODEL if NVIDIA_API_KEY else None,
+        "riva_tts_configured": bool(NVIDIA_API_KEY and RIVA_FUNCTION_ID and RIVA_AVAILABLE),
         "elevenlabs_configured": bool(ELEVENLABS_API_KEY)
     }
 

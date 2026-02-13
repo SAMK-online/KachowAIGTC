@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+*.env.local
+
+# Logs
+*.log
+server.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if any)
+node_modules/
+.next/
+.cache/
+
+# Temp files
+*.tmp
+*.temp
+test_file.py
+
+# Documentation (exclude all .md except README.md)
+*.md
+!README.md
+
+# Deployment files (keep for reference but not critical)
+# These are commented out in case you want them later
+# CLOUD_RUN_QUICKSTART.md
+# DEPLOYMENT_GUIDE.md
+# CONTEXT_AWARENESS_EXPLAINED.md
+# VOICE_CONVERSATIONAL_MODE.md
+# TTS_SETUP_GUIDE.md

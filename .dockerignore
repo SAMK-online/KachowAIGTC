@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Environment files (will be set via Cloud Run)
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (optional - remove if you want to include)
+# *.md
+
+# Logs
+*.log
+server.log
+
+# OS
+.DS_Store
+Thumbs.db
+.Trash/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+test_file.py
+*.tmp
+*.temp
+
+# Cloud
+.gcloudignore
+cloudbuild.yaml
+
+# CI/CD
+.github/
